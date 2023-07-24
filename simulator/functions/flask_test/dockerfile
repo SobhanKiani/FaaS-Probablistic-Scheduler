@@ -1,0 +1,18 @@
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY app.py .
+
+
+RUN mkdir output
+
+RUN pip install requests
+
+EXPOSE 5000
+
+# CMD ["bash", "-c", "python app.py && while [[ $(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5000/test) != 200 ]]; do sleep 1; done"]
+CMD ["python", "app.py"]
