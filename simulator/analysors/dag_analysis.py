@@ -1,4 +1,4 @@
-from analysors.container_analysis import ContainerAnalysis
+from analysors.container_analysis_refined import ContainerAnalysis
 from dag.dag import DAG
 from utils.utils import small_adj_matrix, small_image_vector
 import os
@@ -35,6 +35,21 @@ class DAGAnalysis:
             container_analysis.store_running_times()
             # except:
             #     return f"Could Not Complete The Operation For Index {idx} In Run Times"
+
+
+    def analyse_both_times(self, iter=100, slee_time=3):
+        for idx, image_name in enumerate(list(set(self.dag.image_vector))):
+            # Getting the volumes ready
+            image_base_name = image_name.split(':')[0]
+            host_addr = f'{os.getcwd()}/functions/{image_base_name}_{idx}/output/'
+
+            try:
+                # calculating times
+                ca = self.Analysis(image_name, idx)
+                ca.caluclate_both_times(iters=iter, host_add=host_addr, container_add='/app/output/')
+            except:
+                raise("Could Not Complete The Operation")
+                
 
     def get_init_time_mean(self):
         mean_list = []

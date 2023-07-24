@@ -61,24 +61,9 @@ class ContainerAnalysis:
         starting_duration = end_time - start_time
         return starting_duration
 
-    def calculate_initialization_time(self, iter: int):
-        print(
-            f'Calculating inititalization times for {self.image_name} at index {self.node_idx} in {iter} iterations')
-        self.redis_client.delete(f"{self.base_key}:init")
-        for i in range(iter):
-            print(f"Iteration Number: {i}")
-            init_time = self.get_initialization_time()
-
-            # self.store(f"{self.base_key}:init", init_time)
-            self.store(f"{self.base_key}_{self.node_idx}:init", init_time)
-        print("Initializations stored")
-        print("")
 
     def get_all_init_times_list(self):
-        # init_times = self.redis_client.lrange(
-        #     f"{self.base_key}_{self.node_idx}:init", 0, -1)
-        init_times = self.redis_client.lrange(
-            f"{self.base_key}_0:init", 0, -1)
+        init_times = self.redis_client.lrange(f"{self.base_key}_0:init", 0, -1)
         init_times_decoded = [float(it.decode()) for it in init_times]
         
         return init_times_decoded
@@ -91,24 +76,7 @@ class ContainerAnalysis:
         )
         id = container.id
         wait_for_container(container)
-        # exited_container = self.docker_client.containers.get(id)
-        # container.remove(exited_container)
         
-
-    def calculate_running_time(self, iter, host_add, container_add):
-        # self.running_time_file_addr = f"{host_add}{self.image_base_name}_durations"
-        self.running_time_file_addr = host_add
-
-        self.redis_client.delete(f"{self.base_key}:duration")
-
-        print("Calculating Running times started For: ",
-              f'{self.image_name}_{self.node_idx}')
-        for i in range(iter):
-            print(f"Iteration Number: {i}")
-            self.get_running_time(
-                f'{self.running_time_file_addr}/:{container_add}')
-        print("Finished")
-        print("")
 
     def store_running_times(self):
         running_times_key = f'{self.base_key}_{self.node_idx}:duration'
@@ -118,10 +86,7 @@ class ContainerAnalysis:
             self.store_list(running_times_key, durations)
 
     def get_all_running_times_list(self):
-        # running_times = self.redis_client.lrange(
-        #     f"{self.base_key}_{self.node_idx}:duration", 0, -1)
-        running_times = self.redis_client.lrange(
-            f"{self.base_key}_0:duration", 0, -1)
+        running_times = self.redis_client.lrange(f"{self.base_key}_0:duration", 0, -1)
         running_times_decoded = [float(d.decode()) for d in running_times]
         return running_times_decoded
     
@@ -141,8 +106,11 @@ class ContainerAnalysis:
 
             # Calculating EX Time
             self.get_running_time(f'{self.running_time_file_addr}/:{container_add}')
-        
 
+        print("Storing all of the running times from the file")
+        self.store_running_times()
+        print("Finished")
+        
 
     def get_mean_init_time(self,):
         init_times = self.get_all_init_times_list()
@@ -154,21 +122,3 @@ class ContainerAnalysis:
         avg = statistics.mean(init_times)
         return avg
 
-
-# a = ContainerAnalysis(image_name='mongo:latest', node_idx=1)
-# a = ContainerAnalysis(image_name='f1:latest', node_idx=2)
-# a.set_login_config('sobhankiani04@gmail.com', 'skn1942', 'gameisthebest2014')
-
-# a.calculate_initialization_time(iter=3)
-# print(a.get_all_init_times_list())
-
-# a.get_running_time(volume=f'{os.getcwd()}/functions/f1/output/:/app/output/')
-# a.calculate_running_time(
-    # 3, f'{os.getcwd()}/functions/f1/output/', '/app/output/')
-
-# time.sleep(3)
-# a.stor_running_times()
-# l = a.get_all_running_times_list()
-# print(l)
-# https://registry-1.docker.io/v2/
-# docker.from_env().containers.run()

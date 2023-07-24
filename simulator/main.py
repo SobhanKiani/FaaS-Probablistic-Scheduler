@@ -15,12 +15,12 @@ else:
 
 if __name__ == '__main__':
     f = Flow(equal_adj_matrix, equal_image_vector)
-    # f.analyze_dag(iter=500)
+    # f.analyze_dag(iter=10)
     # print(f.dag_analysis.get_run_time_mean())
 
     print("COLD START TEST")
     f.set_flow_runner(cold_start_fr)
-    f.start_flow_runner()
+    f.start_flow_runner(iters=1)
     print("-------------------")
 
     # print("MOST PROBABLE TEST")

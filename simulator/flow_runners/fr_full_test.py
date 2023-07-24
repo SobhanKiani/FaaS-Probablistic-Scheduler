@@ -14,9 +14,7 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
     for iter in range(iters):
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
-        print(init_times)
-        print("")
-        print(runtimes)
+
         i = 0
         start_time = time.time()
 
