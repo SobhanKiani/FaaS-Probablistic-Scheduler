@@ -43,12 +43,8 @@ class DAGAnalysis:
             image_base_name = image_name.split(':')[0]
             host_addr = f'{os.getcwd()}/functions/{image_base_name}_{idx}/output/'
 
-            try:
-                # calculating times
-                ca = self.Analysis(image_name, idx)
-                ca.caluclate_both_times(iters=iter, host_add=host_addr, container_add='/app/output/')
-            except:
-                raise("Could Not Complete The Operation")
+            ca = self.Analysis(image_name, idx)
+            ca.caluclate_both_times(iters=iter, host_add=host_addr, container_add='/app/output/')
                 
 
     def get_init_time_mean(self):

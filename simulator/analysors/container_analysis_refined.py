@@ -1,10 +1,11 @@
 import time
-import datetime
 import docker
 import redis
 import statistics
 from utils.utils import send_get_request
 from utils.container_utils import wait_for_container
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ContainerAnalysis:
@@ -18,7 +19,7 @@ class ContainerAnalysis:
         self.base_key = f'{self.node_idx}:{self.image_name}'
 
         self.redis_client = redis.Redis(
-            host='localhost', port=32768, username='default', password='redispw')
+            host='localhost', port=32769, username='default', password='redispw')
 
     def login(self, email: str, username: str, password: str):
         self.set_login_config(username, email, password)
@@ -121,4 +122,26 @@ class ContainerAnalysis:
         init_times = self.get_all_running_times_list()
         avg = statistics.mean(init_times)
         return avg
+    
+    def plot_init_time_hist(self):
+        init_times = self.get_all_init_times_list()
+        init_times = np.array(init_times)
+
+        plt.hist(init_times, bins=10, density=True, alpha=0.5, color='blue')
+        plt.xlabel('CS')
+        plt.ylabel('Frequency')
+        plt.title('CS Histogram')
+        plt.show()
+
+    def plot_runtime_hist(self):
+        running_times = self.get_all_running_times_list()
+        running_times = np.array(running_times)
+        print(running_times)
+
+        plt.hist(running_times, bins=50, density=True, alpha=0.5, color='blue')
+        plt.xlabel('EX')
+        plt.ylabel('Frequency')
+        plt.title('EX Histogram')
+        plt.show()
+
 

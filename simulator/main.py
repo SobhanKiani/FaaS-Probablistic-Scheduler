@@ -17,11 +17,13 @@ if __name__ == '__main__':
     f = Flow(equal_adj_matrix, equal_image_vector)
     # f.analyze_dag(iter=10)
     # print(f.dag_analysis.get_run_time_mean())
+    
+    f.plot_runtime_histogram(equal_image_vector[0], 0)
 
-    print("COLD START TEST")
-    f.set_flow_runner(cold_start_fr)
-    f.start_flow_runner(iters=1)
-    print("-------------------")
+    # print("COLD START TEST")
+    # f.set_flow_runner(cold_start_fr)
+    # f.start_flow_runner(iters=1)
+    # print("-------------------")
 
     # print("MOST PROBABLE TEST")
     # f.set_flow_runner(most_probable_fr)

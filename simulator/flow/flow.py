@@ -1,6 +1,6 @@
 from dag.dag import DAG
 from analysors.dag_analysis import DAGAnalysis
-from analysors.container_analysis import ContainerAnalysis
+from analysors.container_analysis_refined import ContainerAnalysis
 from types import FunctionType
 import time
 
@@ -31,3 +31,11 @@ class Flow:
         end_time = time.time()
         self.last_duration = end_time - start_time
         print("Duration Of The Flow: ", self.last_duration)
+
+    def plot_init_histogram(self, image_name, node_idx):
+        ca = ContainerAnalysis(image_name, node_idx)
+        ca.plot_init_time_hist()
+
+    def plot_runtime_histogram(self, image_name, node_idx):
+        ca = ContainerAnalysis(image_name, node_idx)
+        ca.plot_runtime_hist()
