@@ -63,6 +63,8 @@ def generate_random_sample(data):
     new_start_time = norm_dist.rvs()
 
     return new_start_time
+
+
 # equal_adj_matrix = [
 #     [-1, 100, -1, -1, -1, -1, -1, -1],
 #     [-1, -1, 49, 51, -1, -1, -1, -1],
@@ -85,3 +87,6 @@ equal_adj_matrix = [
 ]
 equal_image_vector = ['f1:latest', 'f1:latest', 'f1:latest',
                       'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest',]
+
+
+
