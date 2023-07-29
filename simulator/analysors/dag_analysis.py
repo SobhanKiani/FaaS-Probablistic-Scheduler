@@ -19,12 +19,13 @@ class DAGAnalysis:
             except:
                 return f"Could Not Complete The Operation For Index {idx} In Init Times"
 
-    def analyze_run_times(self,  iter=100, sleep_time=3):
+    def analyze_run_times(self,  iter=100, sleep_time=3, workflow_folder_name='w1'):
 
         for idx, image_name in enumerate(list(set(self.dag.image_vector))):
             # try:
             image_base_name = image_name.split(':')[0]
-            host_addr = f'{os.getcwd()}/functions/{image_base_name}_{idx}/output/'
+            # host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}_{idx}/output/'
+            host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}/output/'
 
             container_analysis = self.Analysis(image_name, idx)
             container_analysis.calculate_running_time(
@@ -37,11 +38,13 @@ class DAGAnalysis:
             #     return f"Could Not Complete The Operation For Index {idx} In Run Times"
 
 
-    def analyse_both_times(self, iter=100, slee_time=3):
-        for idx, image_name in enumerate(list(set(self.dag.image_vector))):
+    def analyse_both_times(self, iter=100, slee_time=3, workflow_folder_name='w1'):
+        for idx, image_name in enumerate(self.dag.image_vector):
+            print('Image:', image_name, "Id:", idx)
             # Getting the volumes ready
             image_base_name = image_name.split(':')[0]
-            host_addr = f'{os.getcwd()}/functions/{image_base_name}_{idx}/output/'
+            # host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}_{idx}/output/'
+            host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}/output/'
 
             ca = self.Analysis(image_name, idx)
             ca.caluclate_both_times(iters=iter, host_add=host_addr, container_add='/app/output/')

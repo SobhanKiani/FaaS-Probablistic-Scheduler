@@ -14,9 +14,9 @@ class Flow:
 
     def analyze_dag(self, iter=100):
         # try:
-        # self.dag_analysis.analyze_run_times(iter, 3)
+        # self.dag_analysis.analyze_run_times(iter, 3, 'w1')
         # self.dag_analysis.analyze_init(iter)
-        self.dag_analysis.analyse_both_times(iter, 3)
+        self.dag_analysis.analyse_both_times(iter, 3, 'w1')
         self.mean_init_time = self.dag_analysis.get_init_time_mean()
         self.mean_run_time = self.dag_analysis.get_run_time_mean()
         # except:

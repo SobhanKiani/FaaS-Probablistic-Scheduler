@@ -12,7 +12,5 @@ WORKDIR /app/
 # Create the output directory
 RUN mkdir output
 
-RUN echo "Hello, world!"
-
 # # Add a command to run your Python function
 CMD ["python", "-c", "import f1; f1.f1()"]

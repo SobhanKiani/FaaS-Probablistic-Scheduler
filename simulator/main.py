@@ -20,7 +20,8 @@ else:
 if __name__ == '__main__':
     # f = Flow(equal_adj_matrix, equal_image_vector)
     f = Flow(random_DAG, random_dag_images)
-    # f.analyze_dag(iter=10)
+    
+    f.analyze_dag(iter=1)
     # print(f.dag_analysis.get_run_time_mean())
     
     # f.plot_runtime_histogram(equal_image_vector[0], 0)
@@ -30,12 +31,12 @@ if __name__ == '__main__':
     # f.start_flow_runner(iters=1)
     # print("-------------------")
 
-    print("MOST PROBABLE TEST")
-    f.set_flow_runner(most_probable_fr)
-    f.start_flow_runner(iters=1)
-    print("-------------------")
+    # print("MOST PROBABLE TEST")
+    # f.set_flow_runner(most_probable_fr)
+    # f.start_flow_runner(iters=1)
+    # print("-------------------")
 
-    print("OPTIMAL TEST")
-    f.set_flow_runner(optimal)
-    f.start_flow_runner(iters=1)
-    print("-------------------")
+    # print("OPTIMAL TEST")
+    # f.set_flow_runner(optimal)
+    # f.start_flow_runner(iters=1)
+    # print("-------------------")

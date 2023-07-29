@@ -12,8 +12,8 @@ random_DAG = [[-1,  125,  175, 700, -1, -1, -1, -1, -1, -1, -1, -1, -1],
               [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  130],
               [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]]
 
-random_dag_images = ['f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest',
-                     'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest',]
+random_dag_images = ['f0:latest', 'f1:latest', 'f2:latest', 'f3:latest', 'f4:latest', 'f5:latest',
+                     'f6:latest', 'f7:latest', 'f8:latest', 'f9:latest', 'f10:latest', 'f11:latest', 'f12:latest',]
 
 random_dag_ex = [1, 1, 0.5, 1.5, 2, 1, 0.5, 2.5, 1, 3, 0.5, 1.5, 2]
 random_dag_cs = [0.9, 0.55, 0.77, 0.4, 0.28,

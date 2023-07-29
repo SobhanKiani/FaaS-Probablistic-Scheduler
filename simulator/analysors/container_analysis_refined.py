@@ -19,7 +19,7 @@ class ContainerAnalysis:
         self.base_key = f'{self.node_idx}:{self.image_name}'
 
         self.redis_client = redis.Redis(
-            host='localhost', port=32769, username='default', password='redispw')
+            host='localhost', port=32768, username='default', password='redispw')
 
     def login(self, email: str, username: str, password: str):
         self.set_login_config(username, email, password)
@@ -64,7 +64,7 @@ class ContainerAnalysis:
 
 
     def get_all_init_times_list(self):
-        init_times = self.redis_client.lrange(f"{self.base_key}_0:init", 0, -1)
+        init_times = self.redis_client.lrange(f"{self.base_key}_{self.node_idx}:init", 0, -1)
         init_times_decoded = [float(it.decode()) for it in init_times]
         
         return init_times_decoded
@@ -87,7 +87,7 @@ class ContainerAnalysis:
             self.store_list(running_times_key, durations)
 
     def get_all_running_times_list(self):
-        running_times = self.redis_client.lrange(f"{self.base_key}_0:duration", 0, -1)
+        running_times = self.redis_client.lrange(f"{self.base_key}_{self.node_idx}:duration", 0, -1)
         running_times_decoded = [float(d.decode()) for d in running_times]
         return running_times_decoded
     
@@ -99,7 +99,7 @@ class ContainerAnalysis:
         self.running_time_file_addr = host_add
 
         for i in range(iters):
-            print(f"Iteration Number: {i}")
+            print(f"Iteration Number: {i+1}")
 
             # Calculating CS time
             init_time = self.get_initialization_time()
@@ -109,6 +109,7 @@ class ContainerAnalysis:
             self.get_running_time(f'{self.running_time_file_addr}/:{container_add}')
 
         print("Storing all of the running times from the file")
+        time.sleep(3)
         self.store_running_times()
         print("Finished")
         
