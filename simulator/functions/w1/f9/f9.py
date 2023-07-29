@@ -6,7 +6,7 @@ import os
 def f1():
     start_time = time.time()
 
-    st = random.uniform(2, 2.5)
+    st = random.uniform(2.75, 3.25)
     time.sleep(st)
 
     end_time = time.time()

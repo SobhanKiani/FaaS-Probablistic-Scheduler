@@ -1,0 +1,18 @@
+FROM python:3.8-slim-buster
+
+# Copy your Python code to the container
+COPY f1.py /app/
+
+# Set the working directory
+WORKDIR /app/
+
+# Install any dependencies
+# RUN pip install pandas
+
+# Create the output directory
+RUN mkdir output
+
+RUN echo "Hello, world!"
+
+# # Add a command to run your Python function
+CMD ["python", "-c", "import f1; f1.f1()"]
