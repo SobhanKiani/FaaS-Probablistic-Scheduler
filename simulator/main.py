@@ -18,13 +18,14 @@ else:
 
 
 if __name__ == '__main__':
-    # f = Flow(equal_adj_matrix, equal_image_vector)
+    # f = Flow(equal_adj_matrix, equal_imageff_vector)
     f = Flow(random_DAG, random_dag_images)
     
-    f.analyze_dag(iter=1)
+    f.analyze_dag(iter=500)
     # print(f.dag_analysis.get_run_time_mean())
     
-    # f.plot_runtime_histogram(equal_image_vector[0], 0)
+    # f.plot_init_histogram(random_dag_images[5], 5)
+    # f.plot_runtime_histogram(random_dag_images[0], 0)
 
     # print("COLD START TEST")
     # f.set_flow_runner(cold_start_fr)
