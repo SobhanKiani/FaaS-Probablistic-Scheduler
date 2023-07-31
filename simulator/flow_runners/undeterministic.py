@@ -103,7 +103,7 @@ def update_init_times(dag: DAG, init_times, ex_times, semaphore,):
 
         children = levels[node_idx]
 
-        cprint(f"Thread: node - {node_idx}", 'red')
+        # cprint(f"Thread: node - {node_idx}", 'red')
         if children.__len__() > 0:
             c_idx, c_info, c_prob = children[0]
 
@@ -171,7 +171,7 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             _, child, _ = chosen
             dag.dag_wfh.update_graph_by_request(from_node=i, to_node=child)
 
-            init_time = generate_random_sample(init_times[child]) / 10000
+            init_time = generate_random_sample(init_times[child])
             run_time = generate_random_sample(runtimes[child])
 
             cprint(f'Running node: {child}', 'yellow')
@@ -196,7 +196,7 @@ def update_init_time_optimal(dag: DAG, init_times, ex_times, semaphore):
     cold_start_candidates = dag.get_cold_start_candidates(
         parent_idx=0, alpha=100)
     
-    print("CS Candidates", cold_start_candidates)
+    
 
     # print(cold_start_candidates)
     for node_idx, info, prob in cold_start_candidates:
@@ -231,13 +231,13 @@ def planner(node_idx, levels, ex_times, init_times):
     ex = mean(ex_times[node_idx])
     cs = mean(init_times[node_idx])
     
-    cprint(f"Thread: node - {node_idx}", 'red')
+    # cprint(f"Thread: node - {node_idx}", 'red')
 
     children = levels[node_idx]
 
     if children.__len__() > 0:
         # sleep_time = ex + cs - 0.5 if ex + cs - 0.5 > 0 else 0
-        sleep_time = ex + cs - 1 if ex + cs - 1 > 0 else 0
+        sleep_time = ex + cs - 0.5 if ex + cs - 0.5 > 0 else 0
 
         time.sleep(sleep_time)
 
@@ -299,7 +299,7 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             _, child, _ = chosen
             dag.dag_wfh.update_graph_by_request(from_node=i, to_node=child)
 
-            init_time = generate_random_sample(init_times[child]) / 10000
+            init_time = generate_random_sample(init_times[child])
             run_time = generate_random_sample(runtimes[child])
             cprint(f'Running node: {child}', 'green')
             cprint(f"TIMES {init_time} {run_time}", 'yellow')
