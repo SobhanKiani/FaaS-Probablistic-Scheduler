@@ -38,7 +38,7 @@ class DAGAnalysis:
             #     return f"Could Not Complete The Operation For Index {idx} In Run Times"
 
 
-    def analyse_both_times(self, iter=100, slee_time=3, workflow_folder_name='w1'):
+    def analyse_both_times(self, iter=100, sleep_time=3, workflow_folder_name='w1'):
         for idx, image_name in enumerate(self.dag.image_vector):
             print('Image:', image_name, "Id:", idx)
             # Getting the volumes ready
@@ -47,7 +47,7 @@ class DAGAnalysis:
             host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}/output/'
 
             ca = self.Analysis(image_name, idx)
-            ca.caluclate_both_times(iters=iter, host_add=host_addr, container_add='/app/output/')
+            ca.caluclate_both_times(iters=iter, host_add=host_addr, container_add='/app/output/', sleep_time=sleep_time)
                 
 
     def get_init_time_mean(self):
@@ -78,7 +78,7 @@ class DAGAnalysis:
         run_times_list = []
         for idx, image_name in enumerate(self.dag.image_vector):
             try:
-                container_analysis = self.Analysis(image_name, 0)
+                container_analysis = self.Analysis(image_name, idx)
                 run_times = container_analysis.get_all_running_times_list()
                 run_times_list.append(run_times)
             except:
@@ -89,7 +89,7 @@ class DAGAnalysis:
         init_list = []
         for idx, image_name in enumerate(self.dag.image_vector):
             try:
-                container_analysis = self.Analysis(image_name, 0)
+                container_analysis = self.Analysis(image_name, idx)
                 image_inits = container_analysis.get_all_init_times_list()
                 init_list.append(image_inits)
             except:

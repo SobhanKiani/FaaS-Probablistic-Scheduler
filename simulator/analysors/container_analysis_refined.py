@@ -19,7 +19,7 @@ class ContainerAnalysis:
         self.base_key = f'{self.node_idx}:{self.image_name}'
 
         self.redis_client = redis.Redis(
-            host='localhost', port=32768, username='default', password='redispw')
+            host='localhost', port=32769, username='default', password='redispw')
 
     def login(self, email: str, username: str, password: str):
         self.set_login_config(username, email, password)
@@ -91,10 +91,10 @@ class ContainerAnalysis:
         running_times_decoded = [float(d.decode()) for d in running_times]
         return running_times_decoded
     
-    def caluclate_both_times(self, iters, host_add, container_add):
+    def caluclate_both_times(self, iters, host_add, container_add, sleep_time=3):
         # Deleting times stored in the past
-        self.redis_client.delete(f"{self.base_key}:duration")
-        self.redis_client.delete(f"{self.base_key}:init")
+        self.redis_client.delete(f"{self.base_key}_{self.node_idx}:duration")
+        self.redis_client.delete(f"{self.base_key}_{self.node_idx}:init")
 
         self.running_time_file_addr = host_add
 
@@ -109,7 +109,7 @@ class ContainerAnalysis:
             self.get_running_time(f'{self.running_time_file_addr}/:{container_add}')
 
         print("Storing all of the running times from the file")
-        time.sleep(3)
+        time.sleep(sleep_time)
         self.store_running_times()
         print("Finished")
         
@@ -126,9 +126,10 @@ class ContainerAnalysis:
     
     def plot_init_time_hist(self):
         init_times = self.get_all_init_times_list()
+        print(max(init_times))
         init_times = np.array(init_times)
-
-        plt.hist(init_times, bins=10, density=True, alpha=0.5, color='blue')
+        
+        plt.hist(init_times, bins=5, density=True, alpha=0.5, color='blue')
         plt.xlabel('CS')
         plt.ylabel('Frequency')
         plt.title('CS Histogram')
@@ -136,10 +137,10 @@ class ContainerAnalysis:
 
     def plot_runtime_hist(self):
         running_times = self.get_all_running_times_list()
+        print(max(running_times))
         running_times = np.array(running_times)
-        print(running_times)
 
-        plt.hist(running_times, bins=50, density=True, alpha=0.5, color='blue')
+        plt.hist(running_times, bins=5, density=True, alpha=0.5, color='blue')
         plt.xlabel('EX')
         plt.ylabel('Frequency')
         plt.title('EX Histogram')

@@ -12,11 +12,11 @@ class Flow:
         self.dag = DAG(self.adj_matrix, self.image_vector, dag_id)
         self.dag_analysis = DAGAnalysis(self.dag, Analysis=Analysis)
 
-    def analyze_dag(self, iter=100):
+    def analyze_dag(self, iter=100, wf_folder_name='w1'):
         # try:
         # self.dag_analysis.analyze_run_times(iter, 3, 'w1')
         # self.dag_analysis.analyze_init(iter)
-        self.dag_analysis.analyse_both_times(iter, 3, 'w1')
+        self.dag_analysis.analyse_both_times(iter, 3, wf_folder_name)
         self.mean_init_time = self.dag_analysis.get_init_time_mean()
         self.mean_run_time = self.dag_analysis.get_run_time_mean()
         # except:
