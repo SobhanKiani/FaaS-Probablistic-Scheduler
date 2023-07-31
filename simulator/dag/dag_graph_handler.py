@@ -73,14 +73,19 @@ class DAGGraphHandler:
             is_parallel = False
 
             if not is_parallel:
+                current_level_results = []
                 final_max_prob_child, final_max_prob = child_probs[0][0], child_probs[0][2]
                 max_prob_child, max_prob, max_prob_idx = child_probs[0][0], child_probs[0][2], 0
+                # print("Child Probs", child_probs)
                 for i in range(1, len(child_probs)):
+                    
                     if max_prob >= beta and max_prob_child not in [r[0] for r in results]:
                         results.append(
                             (max_prob_child, child_probs[i-1][1], max_prob))
+                        current_level_results.append((max_prob_child, child_probs[i-1][1], max_prob))
 
                     curr_prob_child, curr_prob = child_probs[i][0], child_probs[i][2]
+
                     if max_prob - curr_prob >= alpha:
                         break
                     if curr_prob < beta:
@@ -92,19 +97,26 @@ class DAGGraphHandler:
                 if max_prob >= beta and max_prob_child not in [r[0] for r in results]:
                     results.append(
                         (max_prob_child, child_probs[max_prob_idx][1], max_prob))
+                    current_level_results.append((max_prob_child, child_probs[i-1][1], max_prob))
 
                 if l != -1 and l <= 1:
                     return results
                 elif l == -1:
-                    # if final_max_prob >= beta or final_max_prob_child in [r[0] for r in results]:
-                    #     return get_most_probable_children(G, final_max_prob_child, l, alpha, beta, results)
-                    # else:
-                    # return self.get_most_probable_children(self.G, final_max_prob_child, l, alpha, beta, results)
-                    return self.get_most_probable_children(parent_idx=final_max_prob_child, l=l, alpha=alpha,beta=beta, results=results)
+                    # Latest
+                    # return self.get_most_probable_children(parent_idx=final_max_prob_child, l=l, alpha=alpha,beta=beta, results=results)
+                    
+                    for child, prob, prob_idx in current_level_results:
+                        self.get_most_probable_children(parent_idx=child, l=l, alpha=alpha,beta=beta, results=results)
+                    return results
+                    
                 else:
-                    # if max_prob >= beta or max_prob_child in [r[0] for r in results]:
-                    # return self.get_most_probable_children(self.G, final_max_prob_child, l-1, alpha, beta, results)
-                    return self.get_most_probable_children(parent_idx=final_max_prob_child, l=l-1, alpha=alpha, beta=beta, results=results)
+                    # Latest
+                    # return self.get_most_probable_children(parent_idx=final_max_prob_child, l=l-1, alpha=alpha, beta=beta, results=results)
+                    
+                    for child, prob, prob_idx in current_level_results:
+                        self.get_most_probable_children(parent_idx=child, l=l-1, alpha=alpha, beta=beta, results=results)
+                    return results
+
                     # else:
                     # return results
 
