@@ -23,11 +23,13 @@ if __name__ == '__main__':
     # f = Flow(equal_adj_matrix, equal_imageff_vector)
     f = Flow(random_DAG, random_dag_images)
     
-    # f.analyze_dag(iter=500, wf_folder_name='w1')
+    # f.analyze_dag(iter=3, wf_folder_name='w1')
+    # f.analyze_dag_mem(3)
     # print(f.dag_analysis.get_run_time_mean())
     
-    # f.plot_init_histogram(random_dag_images[9],9)
-    # f.plot_runtime_histogram(random_dag_images[0], 0)
+    # f.plot_init_histogram(random_dag_images[0],0)
+    # f.plot_runtime_histogram(random_dag_images[9], 9)
+    f.plot_ram_usage_histogram(random_dag_images[9], 9)
 
     # print("COLD START TEST")
     # f.set_flow_runner(cold_start_fr)
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     # f.start_flow_runner(iters=1)
     # print("-------------------")
 
-    print("OPTIMAL TEST")
-    f.set_flow_runner(optimal)
-    f.start_flow_runner(iters=1)
-    print("-------------------")
+    # print("OPTIMAL TEST")
+    # f.set_flow_runner(optimal)
+    # f.start_flow_runner(iters=1)
+    # print("-------------------")

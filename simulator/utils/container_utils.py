@@ -40,6 +40,21 @@ def wait_for_container(container):
     container.remove()
     return 200
 
+def wait_for_container_mem(container):
+    # Wait for the container to finish executing
+    exit_code = container.wait()['StatusCode']
+    if exit_code != 0:
+        # Handle container errors here
+        return 400
+    
+    stats = container.stats(stream=False)
+    # Retrieve maximum memory usage
+    print(stats)
+    memory_usage = stats['memory_stats']['usage']
+        
+    container.remove()
+    return 200, memory_usage
+
 
 def wait_for_container_boot(container):
     # Wait for the container to boot up

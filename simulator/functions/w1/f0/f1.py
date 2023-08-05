@@ -16,5 +16,7 @@ def f1():
     # Store the duration in a file
     with open(f"/app/output/durations.txt", "a") as f:
         f.write(str(duration) + "\n")
+    
+    time.sleep(2)
 
     return duration

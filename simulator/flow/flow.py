@@ -16,11 +16,16 @@ class Flow:
         # try:
         # self.dag_analysis.analyze_run_times(iter, 3, 'w1')
         # self.dag_analysis.analyze_init(iter)
-        self.dag_analysis.analyse_both_times(iter, 3, wf_folder_name)
+        # self.dag_analysis.analyse_both_times(iter, 3, wf_folder_name)
+        self.dag_analysis.analyze_all_data(iter, 3, wf_folder_name)
         self.mean_init_time = self.dag_analysis.get_init_time_mean()
         self.mean_run_time = self.dag_analysis.get_run_time_mean()
+        self.mean_ram_usage = self.dag_analysis.get_ram_usage_mean()
         # except:
         #     return "Error"
+        
+    def analyze_dag_mem(self, iters=100):
+        self.dag_analysis.anaylyze_mem(iters)
 
     def set_flow_runner(self, flow_runner: FunctionType):
         self.flow_runner = flow_runner
@@ -39,3 +44,7 @@ class Flow:
     def plot_runtime_histogram(self, image_name, node_idx):
         ca = ContainerAnalysis(image_name, node_idx)
         ca.plot_runtime_hist()
+        
+    def plot_ram_usage_histogram(self, image_name, node_idx):
+        ca = ContainerAnalysis(image_name, node_idx)
+        ca.plot_ram_usage_hist()
