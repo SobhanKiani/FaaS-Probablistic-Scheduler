@@ -134,14 +134,15 @@ class ContainerAnalysis:
             # Calculating Mem and EX time
             wait_for_container(container)
 
+            # Storing CS and RAM
             cs_time = end_time - start_time 
             self.store(f"{self.base_key}_{self.node_idx}:init", cs_time)
             self.store(f"{self.base_key}_{self.node_idx}:memory", memory_usage)        
 
-        # print("Storing all of the running times from the file")
-        # time.sleep(sleep_time)
-        # self.store_running_times()
-        # print("Finished")
+        print("Storing all of the running times from the file")
+        time.sleep(sleep_time)
+        self.store_running_times()
+        print("Finished")
         
         
     # def caluclate_both_times(self, iters, host_add, container_add, sleep_time=3):
@@ -224,8 +225,7 @@ class ContainerAnalysis:
         
     def plot_ram_usage_hist(self):
         ru_list = self.get_all_ram_usage()
-        # print(max(ru_list), len(ru_list))
-        print(ru_list, len(ru_list))
+        print(max(ru_list), len(ru_list))
         ru_list = np.array(ru_list)
 
         plt.hist(ru_list, bins=5, density=True, alpha=0.5, color='blue')

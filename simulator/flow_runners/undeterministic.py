@@ -12,20 +12,25 @@ from statistics import mean
 
 def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
     durations = []
+    rams = []
 
     for iter in range(iters):
         experiment_path = [2, 0, 1, 2, 0]
         # experiment_path = [2, 0, 1, 1]
         # experiment_path = [1]
-        
+        total_ram_usage = 0
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
+        ram_usages = dag_analysis.get_all_ram_usage()
 
         i = 0
         start_time = time.time()
 
         init_time = generate_random_sample(init_times[i])
         run_time = generate_random_sample(runtimes[i])
+        ram_usage = generate_random_sample(ram_usages[i])
+        
+        total_ram_usage += ram_usage
         cprint(f'Running node: {i}', 'green')
         cprint(f"TIMES: {init_time} {run_time}", 'yellow')
         time.sleep(init_time)
@@ -52,7 +57,9 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
 
             init_time = generate_random_sample(init_times[child])
             run_time = generate_random_sample(runtimes[child])
-
+            ram_usage = generate_random_sample(ram_usages[child])
+            
+            total_ram_usage += ram_usage
             cprint(f'Running node: {child}', 'green')
             cprint(f"TIMES {init_time} {run_time}", 'yellow')
             time.sleep(init_time)
@@ -66,13 +73,16 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         end_time = time.time()
         d = end_time - start_time
         durations.append(d)
-    print(durations)
+        rams.append(total_ram_usage)
+    print("Durations", durations)
+    print("RAM Usage: ", rams)
+
 
 
 # MOST PROBABLE FR
 
-
-def update_init_times(dag: DAG, init_times, ex_times, semaphore,):
+def update_init_times(dag: DAG, init_times, ex_times, ram_usages, mutex, ram_using_nodes, total_ram_usage, semaphore):
+    
     cprint("Thread Started", 'red')
     cold_start_candidates = dag.get_cold_start_candidates(parent_idx=0)
 
@@ -97,16 +107,15 @@ def update_init_times(dag: DAG, init_times, ex_times, semaphore,):
 
     while True:
         node_idx, info, prbo = cs_dict[current_node_idx]
-        cprint(node_idx, 'red')
+        # cprint(node_idx, 'red')
         ex = mean(ex_times[node_idx])
         cs = mean(init_times[node_idx])
 
         children = levels[node_idx]
-
+        cprint(children.__len__(), "red")
         # cprint(f"Thread: node - {node_idx}", 'red')
         if children.__len__() > 0:
             c_idx, c_info, c_prob = children[0]
-
             # sleep_time = ex + cs - 0.5 if ex + cs - 0.5 > 0 else 0
             sleep_time = ex + cs - 1 if ex + cs - 1 > 0 else 0
             time.sleep(sleep_time)
@@ -120,10 +129,21 @@ def update_init_times(dag: DAG, init_times, ex_times, semaphore,):
             current_node_idx = c_idx
         else:
             break
+    
+    for node_idx, _, _ in cold_start_candidates:
+        if not node_idx in ram_using_nodes:
+            ram_using_nodes.append(node_idx)
+            ram = generate_random_sample(ram_usages[node_idx])
+            cprint(f"RAM: {node_idx}: {ram}", 'red')
+            with mutex:
+                total_ram_usage[0] += ram
+            cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
+            
 
 
 def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
     durations = []
+    rams = []
 
     for iter in range(iters):
         experiment_path = [2, 0, 1, 2, 0]
@@ -133,10 +153,16 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         # Finding cold start candidates
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
-
+        ram_usages = dag_analysis.get_all_ram_usage()
+        
+        ram_using_nodes = []
+        total_ram_usage = [0] #it's defined as an array so it can be passed as reference to the thread
+        
+        mutex = threading.Lock()
         semaphore = threading.Semaphore(1)
+        
         cold_start_thread = threading.Thread(target=update_init_times,
-                                             args=(dag, init_times, runtimes, semaphore))
+                                             args=(dag, init_times, runtimes, ram_usages, mutex, ram_using_nodes, total_ram_usage, semaphore))
         cold_start_thread.start()
 
         i = 0
@@ -145,6 +171,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         init_time = generate_random_sample(init_times[i])
         run_time = generate_random_sample(runtimes[i])
 
+
+
         cprint(f'Running node: {i}', 'yellow')
         cprint(f"TIMES: {init_time} {run_time}", 'yellow')
         time.sleep(init_time)
@@ -152,6 +180,14 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         cprint(f"Node {i} finished running", 'yellow')
         print("")
 
+        if i not in ram_using_nodes:
+            ram_using_nodes.append(i)
+            ram = generate_random_sample(ram_usages[i])
+            with mutex:
+                total_ram_usage[0] += ram
+            cprint(f"RAM: {i}: {ram}", 'cyan')
+            cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
+            
         while True:
             print('Parent: ', i)
 
@@ -179,25 +215,34 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             time.sleep(init_time)
             time.sleep(run_time)
             cprint(f"Node {child} finished running", 'yellow')
+            
+            if child not in ram_using_nodes:
+                ram_using_nodes.append(child)
+                ram = generate_random_sample(ram_usages[child])
+                with mutex:
+                    total_ram_usage[0] += ram
+                cprint(f"RAM: {child}: {ram}", 'cyan')
+                cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
+                
             print("")
-
             i = child
+            
         end_time = time.time()
         d = end_time - start_time
         durations.append(d)
+        rams.append(total_ram_usage[0])
         print(f"ITER {iter} FINISHED")
         print("")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
+    print("RAM Usage List: ", rams)
 
 
-def update_init_time_optimal(dag: DAG, init_times, ex_times, semaphore):
+def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_using_nodes, total_ram_usage, mutex, semaphore):
     cprint("Thread Started", 'red')
     cold_start_candidates = dag.get_cold_start_candidates(
         parent_idx=0, alpha=100)
     
-    
-
     # print(cold_start_candidates)
     for node_idx, info, prob in cold_start_candidates:
         # Acquire the semaphore before updating the shared mean_init_time
@@ -225,6 +270,15 @@ def update_init_time_optimal(dag: DAG, init_times, ex_times, semaphore):
     current_node_idx = 0
 
     planner(current_node_idx, levels, ex_times, init_times)
+    
+    for node_idx, _, _ in cold_start_candidates:
+        if not node_idx in ram_using_nodes:
+            ram_using_nodes.append(node_idx)
+            ram = generate_random_sample(ram_usages[node_idx])
+            cprint(f"RAM: {node_idx}: {ram}", 'red')
+            with mutex:
+                total_ram_usage[0] += ram
+            cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
 
 
 def planner(node_idx, levels, ex_times, init_times):
@@ -250,8 +304,9 @@ def planner(node_idx, levels, ex_times, init_times):
 
 
 def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
-
     durations = []
+    rams = []
+
 
     for iter in range(iters):
         experiment_path = [2, 0, 1, 2, 0]
@@ -261,11 +316,17 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
+        ram_usages = dag_analysis.get_all_ram_usage()
+
+        ram_using_nodes = []
+        total_ram_usage = [0]
+        
 
         # Finding cold start candidates
+        mutex = threading.Lock()
         semaphore = threading.Semaphore(1)
         cold_start_thread = threading.Thread(target=update_init_time_optimal,
-                                             args=(dag, init_times, runtimes, semaphore))
+                                             args=(dag, init_times, runtimes, ram_usages, ram_using_nodes, total_ram_usage, mutex, semaphore))
         cold_start_thread.start()
 
         i = 0
@@ -279,6 +340,14 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         time.sleep(init_time)
         time.sleep(run_time)
         cprint(f"Node {i} finished running", 'green')
+        
+        if i not in ram_using_nodes:
+            ram_using_nodes.append(i)
+            ram = generate_random_sample(ram_usages[i])
+            with mutex:
+                total_ram_usage[0] += ram
+            cprint(f"RAM: {i}: {ram}", 'cyan')
+            cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
         print("")
 
         while True:
@@ -306,12 +375,22 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             time.sleep(init_time)
             time.sleep(run_time)
             cprint(f"Node {child} finished running", 'green')
+            
+            if child not in ram_using_nodes:
+                ram_using_nodes.append(child)
+                ram = generate_random_sample(ram_usages[child])
+                with mutex:
+                    total_ram_usage[0] += ram
+                cprint(f"RAM: {child}: {ram}", 'cyan')
+                cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
             print("")
 
             i = child
         end_time = time.time()
         d = end_time - start_time
         durations.append(d)
+        rams.append(total_ram_usage[0])
         print(f"ITER {iter} FINISHED")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
+    print("Total RAM: ", rams)
