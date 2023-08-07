@@ -7,15 +7,15 @@ if __name__ == '__main__' or parent_module.__name__ == '__main__':
     from utils.utils import equal_adj_matrix, equal_image_vector
     from flow.flow import Flow
     # from flow_runners.fr_full_test import cold_start_fr, most_probable_fr, optimal
-    # from flow_runners.deterministic import most_probable_fr, optimal
-    from flow_runners.undeterministic import most_probable_fr, optimal, cold_start_fr
+    from flow_runners.deterministic import most_probable_fr, optimal, cold_start_fr
+    # from flow_runners.undeterministic import most_probable_fr, optimal, cold_start_fr
     from utils.random_matrices import random_DAG, random_dag_images
 else:
     from .utils.utils import equal_adj_matrix, equal_image_vector
     from .flow.flow import Flow
     # from .flow_runners.fr_full_test import cold_start_fr, most_probable_fr, optimal
-    # from .flow_runners.deterministic import most_probable_fr, optimal
-    from .flow_runners.undeterministic import most_probable_fr, optimal, cold_start_fr
+    from .flow_runners.deterministic import most_probable_fr, optimal, cold_start_fr
+    # from .flow_runners.undeterministic import most_probable_fr, optimal, cold_start_fr
     from .utils.random_matrices import random_DAG, random_dag_images
 
 

@@ -32,3 +32,6 @@ random_dag_images = ['f0:latest', 'f1:latest', 'f2:latest', 'f3:latest', 'f4:lat
 random_dag_ex = [1, 1, 0.5, 1.5, 2, 1, 0.5, 2.5, 1, 3, 0.5, 1.5, 2]
 random_dag_cs = [0.9, 0.55, 0.77, 0.4, 0.28,
                  0.8, 0.25, 0.85, 0.25, 0.24, 0.6, 0.58, 0.75]
+
+random_dag_ram = [5, 5, 5, 5, 5,
+                  5, 5, 5, 5, 5, 5, 5, 5]
