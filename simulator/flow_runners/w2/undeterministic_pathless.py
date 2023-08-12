@@ -83,7 +83,7 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
 
     print("Durations", durations)
     print("RAM Usage: ", rams)
-    with open(f'{os.getcwd()}/results/w1/w1-undeterministic-cs-pathless.txt', 'a') as f:
+    with open(f'{os.getcwd()}/results/w2/u-cs-pathless.txt', 'a') as f:
         for i in range(durations.__len__()):
             d = durations[i]
             r = rams[i] / (1024 * 1024)
@@ -243,7 +243,7 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w1/w1-undeterministic-probable-pathless.txt', 'a') as f:
+        with open(f'{os.getcwd()}/results/w2/u-probable-pathless.txt', 'a') as f:
                 # d = durations[iter]
                 r = total_ram_usage[0] / (1024 * 1024)
                 f.write(f"{d},{r}\n")
@@ -267,7 +267,7 @@ def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_usi
         # Release the semaphore after the update is done
         semaphore.release()
 
-    cs_dict = {0: (0, (), {'weight': 100})}
+    cs_dict = {0: (0, (), {'weight': 1000})}
     for node in cold_start_candidates:
         cs_dict[node[0]] = node
 
@@ -325,6 +325,9 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
     rams = []
 
     for iter in range(iters):
+        experiment_path = [2, 0, 1, 2, 0]
+        # experiment_path = [2, 0, 1, 1]
+        # experiment_path = [1]
 
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
@@ -404,7 +407,7 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w1/w1-undeterministic-optimal-parameters-pathless.txt', 'a') as f:
+        with open(f'{os.getcwd()}/results/w2/u-optimal-parameters-pathless.txt', 'a') as f:
             # d = durations[iter]
             r = total_ram_usage[0] / (1024 * 1024)
             f.write(f"{d},{r}\n")  

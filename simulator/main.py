@@ -44,5 +44,5 @@ if __name__ == '__main__':
 
     print("OPTIMAL TEST")
     f.set_flow_runner(optimal)
-    f.start_flow_runner(iters=300)
+    f.start_flow_runner(iters=100)
     print("-------------------")

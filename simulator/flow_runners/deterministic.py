@@ -78,7 +78,7 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
 
     print("FINAL DURATIONS", durations)
     print("FINAL RAMS", rams)
-    with open(f'{os.getcwd()}/results/w1-deterministic-cs.txt', 'a') as f:
+    with open(f'{os.getcwd()}/results/w1/w1-deterministic-cs.txt', 'a') as f:
         for i in range(durations.__len__()):
             d = durations[i]
             r = rams[i]
@@ -242,7 +242,7 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
     print("FINAL DURATIONS", durations)
     print("FINAL RAMS", rams)
 
-    with open(f'{os.getcwd()}/results/w1-deterministic-probable.txt', 'a') as f:
+    with open(f'{os.getcwd()}/results/w1/w1-deterministic-probable.txt', 'a') as f:
         for i in range(durations.__len__()):
             d = durations[i]
             r = rams[i]
@@ -396,7 +396,7 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
     print("FINAL DURATIONS: ", durations)
     print("FINAL RAMS: ", rams)
     
-    with open(f'{os.getcwd()}/results/w1-deterministic-optimal.txt', 'a') as f:
+    with open(f'{os.getcwd()}/results/w1/w1-deterministic-optimal.txt', 'a') as f:
         for i in range(durations.__len__()):
             d = durations[i]
             r = rams[i]

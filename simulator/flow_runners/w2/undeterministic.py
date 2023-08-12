@@ -6,21 +6,17 @@ import threading
 from termcolor import cprint
 from statistics import mean
 import os
-import random
-import copy
 
 # COLD START FR
 
 
-def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
+def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
     durations = []
     rams = []
-    dag = copy.copy(dag_main)
 
     for iter in range(iters):
-        # experiment_path = [2, 0, 1, 2, 0]
-        # experiment_path = [2, 0, 1, 1]
-        # experiment_path = [1]
+        experiment_path = [0, 1, 0, 1, 4]
+
         total_ram_usage = 0
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
@@ -46,17 +42,17 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
             if len(edges) == 0:
                 break
 
-            edge_weights = [edge[2]['weight'] for edge in edges]
+            # edge_weights = [edge[2]['weight'] for edge in edges]
 
             # # It Uses range(len(edge_weights)) to get the indexes instead of the weights themselves
-            chosen_index = random.choices(
-                range(len(edge_weights)), weights=edge_weights, k=1)[0]
+            # chosen_index = random.choices(
+            #     range(len(edge_weights)), weights=edge_weights, k=1)[0]
 
-            
+            chosen_index = experiment_path.pop(0)
             chosen = edges[chosen_index]
             _, child, _ = chosen
             # dag.dag_wfh.update_graph_by_request(from_node=i, to_node=child)
-            print("CHOSEN INDEX", chosen_index, child)
+            print("CHOSE INDEX", chosen_index, child)
 
             init_time = generate_random_sample(init_times[child])
             run_time = generate_random_sample(runtimes[child])
@@ -80,20 +76,24 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
+        with open(f'{os.getcwd()}/results/w2/u-cs.txt', 'a') as f:
+            # d = durations[i]
+            r = total_ram_usage / (1024 * 1024)
+            f.write(f"{d},{r}\n")
 
     print("Durations", durations)
     print("RAM Usage: ", rams)
-    with open(f'{os.getcwd()}/results/w1/w1-undeterministic-cs-pathless.txt', 'a') as f:
-        for i in range(durations.__len__()):
-            d = durations[i]
-            r = rams[i] / (1024 * 1024)
-            f.write(f"{d},{r}\n")
+    # with open(f'{os.getcwd()}/results/w2/u-cs.txt', 'a') as f:
+    #     for i in range(durations.__len__()):
+    #         d = durations[i]
+    #         r = rams[i] / (1024 * 1024)
+    #         f.write(f"{d},{r}\n")
 
 
 # MOST PROBABLE FR
 
 def update_init_times(dag: DAG, init_times, ex_times, ram_usages, mutex, ram_using_nodes, total_ram_usage, semaphore):
-    
+
     cprint("Thread Started", 'red')
     cold_start_candidates = dag.get_cold_start_candidates(parent_idx=0)
 
@@ -151,13 +151,12 @@ def update_init_times(dag: DAG, init_times, ex_times, ram_usages, mutex, ram_usi
             cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
 
 
-def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
-    dag = copy.copy(dag_main)
+def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
     durations = []
     rams = []
 
     for iter in range(iters):
-        experiment_path = [2, 0, 1, 2, 0]
+        experiment_path = [0, 1, 0, 1, 4]
         # experiment_path = [2, 0, 1, 1]
         # experiment_path = [1]
 
@@ -205,12 +204,13 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
             if len(edges) == 0:
                 break
 
-            edge_weights = [edge[2]['weight'] for edge in edges]
+            # edge_weights = [edge[2]['weight'] for edge in edges]
 
-            # It Uses range(len(edge_weights)) to get the indexes instead of the weights themselves
-            chosen_index = random.choices(
-                range(len(edge_weights)), weights=edge_weights, k=1)[0]
+            # # It Uses range(len(edge_weights)) to get the indexes instead of the weights themselves
+            # chosen_index = random.choices(
+            #     range(len(edge_weights)), weights=edge_weights, k=1)[0]
 
+            chosen_index = experiment_path.pop(0)
 
             chosen = edges[chosen_index]
             _, child, _ = chosen
@@ -243,21 +243,26 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w1/w1-undeterministic-probable-pathless.txt', 'a') as f:
-                # d = durations[iter]
-                r = total_ram_usage[0] / (1024 * 1024)
-                f.write(f"{d},{r}\n")
+        with open(f'{os.getcwd()}/results/w2/u-probable.txt', 'a') as f:
+            # d = durations[i]
+            r = total_ram_usage[0] / (1024 * 1024)
+            f.write(f"{d},{r}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("RAM Usage List: ", rams)
 
+    # with open(f'{os.getcwd()}/results/w2/u-probable.txt', 'a') as f:
+    #     for i in range(durations.__len__()):
+    #         d = durations[i]
+    #         r = rams[i] / (1024 * 1024)
+    #         f.write(f"{d},{r}\n")
 
 
 def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_using_nodes, total_ram_usage, mutex, semaphore):
     cprint("Thread Started", 'red')
     cold_start_candidates = dag.get_cold_start_candidates(
-        # parent_idx=0, alpha=100)
-        parent_idx=0, alpha=50, beta=20)
+        parent_idx=0, alpha=100)
+        # parent_idx=0, alpha=50, beta=20)
 
     # print(cold_start_candidates)
     for node_idx, info, prob in cold_start_candidates:
@@ -267,7 +272,7 @@ def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_usi
         # Release the semaphore after the update is done
         semaphore.release()
 
-    cs_dict = {0: (0, (), {'weight': 100})}
+    cs_dict = {0: (0, (), {'weight': 1000})}
     for node in cold_start_candidates:
         cs_dict[node[0]] = node
 
@@ -319,12 +324,14 @@ def planner(node_idx, levels, ex_times, init_times):
             p_thread.start()
 
 
-def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
-    dag = copy.copy(dag_main)
+def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
     durations = []
     rams = []
 
     for iter in range(iters):
+        experiment_path = [0, 1, 0, 1, 4]
+        # experiment_path = [2, 0, 1, 1]
+        # experiment_path = [1]
 
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
@@ -368,13 +375,13 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             if len(edges) == 0:
                 break
 
-            edge_weights = [edge[2]['weight'] for edge in edges]
+            # edge_weights = [edge[2]['weight'] for edge in edges]
 
-            # It Uses range(len(edge_weights)) to get the indexes instead of the weights themselves
-            chosen_index = random.choices(
-                range(len(edge_weights)), weights=edge_weights, k=1)[0]
+            # # It Uses range(len(edge_weights)) to get the indexes instead of the weights themselves
+            # chosen_index = random.choices(
+            #     range(len(edge_weights)), weights=edge_weights, k=1)[0]
 
-
+            chosen_index = experiment_path.pop(0)
             chosen = edges[chosen_index]
             _, child, _ = chosen
             # dag.dag_wfh.update_graph_by_request(from_node=i, to_node=child)
@@ -404,19 +411,16 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w1/w1-undeterministic-optimal-parameters-pathless.txt', 'a') as f:
-            # d = durations[iter]
+        with open(f'{os.getcwd()}/results/w2/u-optimal.txt', 'a') as f:
+            # d = durations[i]
             r = total_ram_usage[0] / (1024 * 1024)
-            f.write(f"{d},{r}\n")  
-              
+            f.write(f"{d},{r}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("Total RAM: ", rams)
-    
-    
-    # with open(f'{os.getcwd()}/results/w1/w1-undeterministic-optimal-parameters-pathless.txt', 'a') as f:
-    # with open(f'{os.getcwd()}/results/w1/w1-undeterministic-optimal-pathless.txt', 'a') as f:
+
+    # with open(f'{os.getcwd()}/results/w2/u-optimal-parameters.txt', 'a') as f:
     #     for i in range(durations.__len__()):
     #         d = durations[i]
     #         r = rams[i] / (1024 * 1024)
-    #         f.write(f"{d},{r}\n")    
+    #         f.write(f"{d},{r}\n")
