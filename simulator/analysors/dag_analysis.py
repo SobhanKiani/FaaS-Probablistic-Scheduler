@@ -43,7 +43,8 @@ class DAGAnalysis:
             print('Image:', image_name, "Id:", idx)
             # Getting the volumes ready
             image_base_name = image_name.split(':')[0]
-            # host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}_{idx}/output/'
+            
+            host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}_{idx}/output/'
             host_addr = f'{os.getcwd()}/functions/{workflow_folder_name}/{image_base_name}/output/'
 
             ca = self.Analysis(image_name, idx)

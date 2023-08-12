@@ -229,9 +229,9 @@ class ContainerAnalysis:
         ru_list = np.array(ru_list)
 
         plt.hist(ru_list, bins=5, density=True, alpha=0.5, color='blue')
-        plt.xlabel('EX')
+        plt.xlabel('Ram')
         plt.ylabel('Frequency')
-        plt.title('EX Histogram')
+        plt.title('Ram Histogram')
         plt.show()
 
 
