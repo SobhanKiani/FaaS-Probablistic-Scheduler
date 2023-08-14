@@ -21,6 +21,8 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         rams_usages = random_dag_2_ram.copy()
 
         total_ram_usage = 0
+        total_cs_time = 0
+        total_cs_count = 0
 
         i = 0
         start_time = time.time()
@@ -34,6 +36,8 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         time.sleep(run_time)
         print(f"Node {i} finished running")
         total_ram_usage += rams_usages[i]
+        total_cs_time += init_time
+        total_cs_count += 1
         print("")
 
         while True:
@@ -64,6 +68,9 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
             print(f"Node {child} finished running")
             print("")
             total_ram_usage += rams_usages[child]
+            total_cs_time += init_time
+            total_cs_count += 1
+            
             i = child
             print('New Parent: ', i)
 
@@ -74,14 +81,17 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'yellow')
         print("")
+        with open(f'{os.getcwd()}/results/w2/d-cs.txt', 'a') as f:
+            r = total_ram_usage
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
 
     print("FINAL DURATIONS", durations)
     print("FINAL RAMS", rams)
-    with open(f'{os.getcwd()}/results/w2/d-cs.txt', 'a') as f:
-        for i in range(durations.__len__()):
-            d = durations[i]
-            r = rams[i]
-            f.write(f"{d},{r}\n")
+    # with open(f'{os.getcwd()}/results/w2/d-cs.txt', 'a') as f:
+    #     for i in range(durations.__len__()):
+    #         d = durations[i]
+    #         r = rams[i]
+    #         f.write(f"{d},{r}\n")
 
 
 # MOST PROBABLE FR
@@ -164,6 +174,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         total_ram_usage = [0]
         ram_using_nodes = []
+        total_cs_time = 0
+        total_cs_count = 0
 
         semaphore = threading.Semaphore(1)
         mutex = threading.Lock()
@@ -188,6 +200,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             ram_using_nodes.append(i)
             total_ram_usage[0] += ram_usages[i]
             mutex.release()
+            total_cs_time += init_time
+            total_cs_count += 1
             cprint(f"Total Ram Usage: {total_ram_usage[0]}", 'cyan')
         print("")
 
@@ -223,6 +237,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
                 ram_using_nodes.append(child)
                 total_ram_usage[0] += ram_usages[child]
                 mutex.release()
+                total_cs_time += init_time
+                total_cs_count += 1
                 cprint(f"Total Ram Usage: {total_ram_usage[0]}", 'cyan')
 
             i = child
@@ -236,21 +252,24 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'yellow')
         print("")
+        with open(f'{os.getcwd()}/results/w2/d-probable.txt', 'a') as f:
+            r = total_ram_usage[0]
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
     print("FINAL DURATIONS", durations)
     print("FINAL RAMS", rams)
 
-    with open(f'{os.getcwd()}/results/w2/d-probable.txt', 'a') as f:
-        for i in range(durations.__len__()):
-            d = durations[i]
-            r = rams[i]
-            f.write(f"{d},{r}\n")
+    # with open(f'{os.getcwd()}/results/w2/d-probable.txt', 'a') as f:
+    #     for i in range(durations.__len__()):
+    #         d = durations[i]
+    #         r = rams[i]
+    #         f.write(f"{d},{r}\n")
 
 
 def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, semaphore, mutex, ram_using_nodes, total_ram_usage):
     cprint("Thread Started", 'red')
     cold_start_candidates = dag.get_cold_start_candidates(
-        parent_idx=0, alpha=100)
-        # parent_idx=0, alpha=50, beta=20)
+        # parent_idx=0, alpha=100)
+        parent_idx=0, alpha=50, beta=20)
 
     # print(cold_start_candidates)
     for node_idx, info, prob in cold_start_candidates:
@@ -322,6 +341,8 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         ram_using_nodes = []
         total_ram_usage = [0]
+        total_cs_time = 0
+        total_cs_count = 0
 
         # Finding cold start candidates
         semaphore = threading.Semaphore(1)
@@ -345,6 +366,8 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             ram_using_nodes.append(i)
             total_ram_usage[0] += ram_usages[i]
             mutex.release()
+            total_cs_time += init_time
+            total_cs_count += 1
             cprint(f"Total Ram Usage: {total_ram_usage[0]}", 'cyan')
 
         print("")
@@ -377,6 +400,8 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
                 ram_using_nodes.append(i)
                 total_ram_usage[0] += ram_usages[i]
                 mutex.release()
+                total_cs_time += init_time
+                total_cs_count += 1
                 cprint(f"Total Ram Usage: {total_ram_usage[0]}", 'cyan')
 
             print("")
@@ -390,12 +415,15 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'yellow')
         print("")
+        with open(f'{os.getcwd()}/results/w2/d-optimal-parameters.txt', 'a') as f:
+            r = total_ram_usage[0]
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
 
     print("FINAL DURATIONS: ", durations)
     print("FINAL RAMS: ", rams)
 
-    with open(f'{os.getcwd()}/results/w2/d-optimal.txt', 'a') as f:
-        for i in range(durations.__len__()):
-            d = durations[i]
-            r = rams[i]
-            f.write(f"{d},{r}\n")
+    # with open(f'{os.getcwd()}/results/w2/d-optimal.txt', 'a') as f:
+    #     for i in range(durations.__len__()):
+    #         d = durations[i]
+    #         r = rams[i]
+    #         f.write(f"{d},{r}\n")

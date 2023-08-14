@@ -22,6 +22,8 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
         # experiment_path = [2, 0, 1, 1]
         # experiment_path = [1]
         total_ram_usage = 0
+        total_cs_time = 0
+        total_cs_count = 0
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
         ram_usages = dag_analysis.get_all_ram_usage()
@@ -40,6 +42,8 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
         time.sleep(run_time)
         cprint(f"Node {i} finished running", 'green')
         print("")
+        total_cs_time += init_time
+        total_cs_count += 1
 
         while True:
             edges = list(dag.dag_wfh.G.out_edges(i, data=True))
@@ -69,6 +73,9 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
             time.sleep(run_time)
             cprint(f"Node {child} finished running", 'green')
             print("")
+            
+            total_cs_time += init_time
+            total_cs_count += 1
 
             i = child
             print('New Parent: ', i)
@@ -77,17 +84,22 @@ def cold_start_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100
         d = end_time - start_time
         durations.append(d)
         rams.append(total_ram_usage)
+
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
+        with open(f'{os.getcwd()}/results/w1/u-cs-pathless.txt', 'a') as f:
+            # d = durations[i]
+            r = total_ram_usage / (1024 * 1024)
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
 
     print("Durations", durations)
     print("RAM Usage: ", rams)
-    with open(f'{os.getcwd()}/results/w1/w1-undeterministic-cs-pathless.txt', 'a') as f:
-        for i in range(durations.__len__()):
-            d = durations[i]
-            r = rams[i] / (1024 * 1024)
-            f.write(f"{d},{r}\n")
+    # with open(f'{os.getcwd()}/results/w1/w1-undeterministic-cs-pathless.txt', 'a') as f:
+    #     for i in range(durations.__len__()):
+    #         d = durations[i]
+    #         r = rams[i] / (1024 * 1024)
+    #         f.write(f"{d},{r}\n")
 
 
 # MOST PROBABLE FR
@@ -169,6 +181,8 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
         ram_using_nodes = []
         # it's defined as an array so it can be passed as reference to the thread
         total_ram_usage = [0]
+        total_cs_time = 0
+        total_cs_count = 0
 
         mutex = threading.Lock()
         semaphore = threading.Semaphore(1)
@@ -195,6 +209,8 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
             ram = generate_random_sample(ram_usages[i])
             with mutex:
                 total_ram_usage[0] += ram
+            total_cs_time += init_time
+            total_cs_count += 1
             cprint(f"RAM: {i}: {ram}", 'cyan')
             cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
 
@@ -230,6 +246,8 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
                 ram = generate_random_sample(ram_usages[child])
                 with mutex:
                     total_ram_usage[0] += ram
+                total_cs_time += init_time
+                total_cs_count += 1
                 cprint(f"RAM: {child}: {ram}", 'cyan')
                 cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
 
@@ -243,10 +261,11 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w1/w1-undeterministic-probable-pathless.txt', 'a') as f:
+        with open(f'{os.getcwd()}/results/w1/u-probable-pathless.txt', 'a') as f:
                 # d = durations[iter]
                 r = total_ram_usage[0] / (1024 * 1024)
-                f.write(f"{d},{r}\n")
+                f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
+                
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("RAM Usage List: ", rams)
@@ -332,6 +351,8 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         ram_using_nodes = []
         total_ram_usage = [0]
+        total_cs_time = 0
+        total_cs_count = 0
 
         # Finding cold start candidates
         mutex = threading.Lock()
@@ -357,6 +378,8 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             ram = generate_random_sample(ram_usages[i])
             with mutex:
                 total_ram_usage[0] += ram
+            total_cs_time += init_time
+            total_cs_count += 1
             cprint(f"RAM: {i}: {ram}", 'cyan')
             cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
         print("")
@@ -392,6 +415,8 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
                 ram = generate_random_sample(ram_usages[child])
                 with mutex:
                     total_ram_usage[0] += ram
+                total_cs_time += init_time
+                total_cs_count += 1
                 cprint(f"RAM: {child}: {ram}", 'cyan')
                 cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
             print("")
@@ -404,10 +429,10 @@ def optimal(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w1/w1-undeterministic-optimal-parameters-pathless.txt', 'a') as f:
+        with open(f'{os.getcwd()}/results/w1/u-optimal-parameters-pathless.txt', 'a') as f:
             # d = durations[iter]
             r = total_ram_usage[0] / (1024 * 1024)
-            f.write(f"{d},{r}\n")  
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")  
               
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))

@@ -18,6 +18,9 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         experiment_path = [0, 1, 0, 1, 4]
 
         total_ram_usage = 0
+        total_cs_time = 0
+        total_cs_count = 0
+        
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
         ram_usages = dag_analysis.get_all_ram_usage()
@@ -36,6 +39,8 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         time.sleep(run_time)
         cprint(f"Node {i} finished running", 'green')
         print("")
+        total_cs_time += init_time
+        total_cs_count += 1
 
         while True:
             edges = list(dag.dag_wfh.G.out_edges(i, data=True))
@@ -65,6 +70,8 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
             time.sleep(run_time)
             cprint(f"Node {child} finished running", 'green')
             print("")
+            total_cs_time += init_time
+            total_cs_count += 1
 
             i = child
             print('New Parent: ', i)
@@ -79,7 +86,7 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         with open(f'{os.getcwd()}/results/w2/u-cs.txt', 'a') as f:
             # d = durations[i]
             r = total_ram_usage / (1024 * 1024)
-            f.write(f"{d},{r}\n")
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
 
     print("Durations", durations)
     print("RAM Usage: ", rams)
@@ -168,6 +175,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         ram_using_nodes = []
         # it's defined as an array so it can be passed as reference to the thread
         total_ram_usage = [0]
+        total_cs_time = 0
+        total_cs_count = 0
 
         mutex = threading.Lock()
         semaphore = threading.Semaphore(1)
@@ -194,6 +203,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             ram = generate_random_sample(ram_usages[i])
             with mutex:
                 total_ram_usage[0] += ram
+            total_cs_time += init_time
+            total_cs_count += 1
             cprint(f"RAM: {i}: {ram}", 'cyan')
             cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
 
@@ -230,6 +241,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
                 ram = generate_random_sample(ram_usages[child])
                 with mutex:
                     total_ram_usage[0] += ram
+                total_cs_time += init_time
+                total_cs_count += 1
                 cprint(f"RAM: {child}: {ram}", 'cyan')
                 cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
 
@@ -246,7 +259,7 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         with open(f'{os.getcwd()}/results/w2/u-probable.txt', 'a') as f:
             # d = durations[i]
             r = total_ram_usage[0] / (1024 * 1024)
-            f.write(f"{d},{r}\n")
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("RAM Usage List: ", rams)
@@ -261,8 +274,8 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_using_nodes, total_ram_usage, mutex, semaphore):
     cprint("Thread Started", 'red')
     cold_start_candidates = dag.get_cold_start_candidates(
-        parent_idx=0, alpha=100)
-        # parent_idx=0, alpha=50, beta=20)
+        # parent_idx=0, alpha=100)
+        parent_idx=0, alpha=50, beta=20)
 
     # print(cold_start_candidates)
     for node_idx, info, prob in cold_start_candidates:
@@ -339,6 +352,8 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         ram_using_nodes = []
         total_ram_usage = [0]
+        total_cs_time = 0
+        total_cs_count = 0
 
         # Finding cold start candidates
         mutex = threading.Lock()
@@ -364,6 +379,8 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             ram = generate_random_sample(ram_usages[i])
             with mutex:
                 total_ram_usage[0] += ram
+            total_cs_time += init_time
+            total_cs_count += 1
             cprint(f"RAM: {i}: {ram}", 'cyan')
             cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
         print("")
@@ -399,6 +416,8 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
                 ram = generate_random_sample(ram_usages[child])
                 with mutex:
                     total_ram_usage[0] += ram
+                total_cs_time += init_time
+                total_cs_count += 1
                 cprint(f"RAM: {child}: {ram}", 'cyan')
                 cprint(f"TOTAL RAM USAGE: {total_ram_usage[0]}", 'green')
             print("")
@@ -411,10 +430,10 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w2/u-optimal.txt', 'a') as f:
+        with open(f'{os.getcwd()}/results/w2/u-optimal-parameters.txt', 'a') as f:
             # d = durations[i]
             r = total_ram_usage[0] / (1024 * 1024)
-            f.write(f"{d},{r}\n")
+            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("Total RAM: ", rams)

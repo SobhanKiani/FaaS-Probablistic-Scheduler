@@ -34,15 +34,15 @@ if __name__ == '__main__':
 
     # print("COLD START TEST")
     # f.set_flow_runner(cold_start_fr)
-    # f.start_flow_runner(iters=300)
+    # f.start_flow_runner(iters=500)
     # print("-------------------")
 
-    # print("MOST PROBABLE TEST")
-    # f.set_flow_runner(most_probable_fr)
-    # f.start_flow_runner(iters=300)
-    # print("-------------------")
+    print("MOST PROBABLE TEST")
+    f.set_flow_runner(most_probable_fr)
+    f.start_flow_runner(iters=227)
+    print("-------------------")
 
     print("OPTIMAL TEST")
     f.set_flow_runner(optimal)
-    f.start_flow_runner(iters=100)
+    f.start_flow_runner(iters=500)
     print("-------------------")
