@@ -263,7 +263,7 @@ def most_probable_fr(dag_main: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=
         with open(f'{os.getcwd()}/results/w2/u-probable-pathless.txt', 'a') as f:
                 # d = durations[iter]
                 r = total_ram_usage[0] / (1024 * 1024)
-                f.write(f"{d},{r},{total_cs_count},{total_cs_time}\n")
+                f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("RAM Usage List: ", rams)

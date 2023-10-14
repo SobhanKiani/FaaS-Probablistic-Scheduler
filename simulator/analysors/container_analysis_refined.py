@@ -19,8 +19,10 @@ class ContainerAnalysis:
         self.base_key = f'{self.node_idx}:{self.image_name}'
 
         self.redis_client = redis.Redis(
-            host='localhost', port=32768, username='default', password='redispw')
+            # host='localhost', port=32768, username='default', password='redispw')
             # host='localhost', port=6380, username='default', password='redispw')
+            host='localhost', port=32768, username='default', password='redispw')
+            
 
     def login(self, email: str, username: str, password: str):
         self.set_login_config(username, email, password)
