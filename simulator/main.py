@@ -7,17 +7,17 @@ if __name__ == '__main__' or parent_module.__name__ == '__main__':
     from utils.utils import equal_adj_matrix, equal_image_vector
     from flow.flow import Flow
     # from flow_runners.fr_full_test import cold_start_fr, most_probable_fr, optimal
-    # from flow_runners.deterministic import most_probable_fr, optimal, cold_start_fr
-    # from flow_runners.undeterministic import most_probable_fr, optimal, cold_start_fr
-    from flow_runners.undeterministic_pathless import most_probable_fr, optimal, cold_start_fr
+    # from flow_runners.w1.deterministic import most_probable_fr, optimal, cold_start_fr
+    # from flow_runners.w1.undeterministic import most_probable_fr, optimal, cold_start_fr
+    from flow_runners.w1.undeterministic_pathless import most_probable_fr, optimal, cold_start_fr
     from utils.random_matrices import random_DAG, random_dag_images
 else:
     from .utils.utils import equal_adj_matrix, equal_image_vector
     from .flow.flow import Flow
     # from .flow_runners.fr_full_test import cold_start_fr, most_probable_fr, optimal
-    # from .flow_runners.deterministic import most_probable_fr, optimal, cold_start_fr
-    # from .flow_runners.undeterministic import most_probable_fr, optimal, cold_start_fr
-    from .flow_runners.undeterministic_pathless import most_probable_fr, optimal, cold_start_fr
+    # from .flow_runners.w1.deterministic import most_probable_fr, optimal, cold_start_fr
+    # from .flow_runners.w1.undeterministic import most_probable_fr, optimal, cold_start_fr
+    from .flow_runners.w1.undeterministic_pathless import most_probable_fr, optimal, cold_start_fr
     from .utils.random_matrices import random_DAG, random_dag_images
 
 
@@ -30,19 +30,19 @@ if __name__ == '__main__':
     
     # f.plot_init_histogram(random_dag_images[0],0)
     # f.plot_runtime_histogram(random_dag_images[0], 0)
-    f.plot_ram_usage_histogram(random_dag_images[2], 2)
+    # f.plot_ram_usage_histogram(random_dag_images[2], 2)
 
-    # print("COLD START TEST")
-    # f.set_flow_runner(cold_start_fr)
-    # f.start_flow_runner(iters=500)
-    # print("-------------------")
+    print("COLD START TEST")
+    f.set_flow_runner(cold_start_fr)
+    f.start_flow_runner(iters=10)
+    print("-------------------")
 
-    # print("MOST PROBABLE TEST")
-    # f.set_flow_runner(most_probable_fr)
-    # f.start_flow_runner(iters=227)
-    # print("-------------------")
+    print("MOST PROBABLE TEST")
+    f.set_flow_runner(most_probable_fr)
+    f.start_flow_runner(iters=10)
+    print("-------------------")
 
-    # print("OPTIMAL TEST")
-    # f.set_flow_runner(optimal)
-    # f.start_flow_runner(iters=500)
-    # print("-------------------")
+    print("OPTIMAL TEST")
+    f.set_flow_runner(optimal)
+    f.start_flow_runner(iters=10)
+    print("-------------------")

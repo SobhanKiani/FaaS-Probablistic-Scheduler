@@ -20,13 +20,14 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         total_ram_usage = 0
         total_cs_time = 0
         total_cs_count = 0
+        total_sim_time = 0
         
         init_times = dag_analysis.get_all_initializations()
         runtimes = dag_analysis.get_all_run_times()
         ram_usages = dag_analysis.get_all_ram_usage()
 
         i = 0
-        start_time = time.time()
+        # start_time = time.time()
 
         init_time = generate_random_sample(init_times[i])
         run_time = generate_random_sample(runtimes[i])
@@ -35,8 +36,10 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
         total_ram_usage += ram_usage
         cprint(f'Running node: {i}', 'green')
         cprint(f"TIMES: {init_time} {run_time}", 'yellow')
-        time.sleep(init_time)
-        time.sleep(run_time)
+        # time.sleep(init_time)
+        # time.sleep(run_time)
+        total_sim_time += init_time
+        total_sim_time += run_time
         cprint(f"Node {i} finished running", 'green')
         print("")
         total_cs_time += init_time
@@ -66,8 +69,10 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
             total_ram_usage += ram_usage
             cprint(f'Running node: {child}', 'green')
             cprint(f"TIMES {init_time} {run_time}", 'yellow')
-            time.sleep(init_time)
-            time.sleep(run_time)
+            # time.sleep(init_time)
+            # time.sleep(run_time)
+            total_sim_time += init_time
+            total_sim_time += run_time
             cprint(f"Node {child} finished running", 'green')
             print("")
             total_cs_time += init_time
@@ -76,25 +81,22 @@ def cold_start_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=100):
             i = child
             print('New Parent: ', i)
 
-        end_time = time.time()
-        d = end_time - start_time
+        # end_time = time.time()
+        # d = end_time - start_time
+        d = total_sim_time
         durations.append(d)
         rams.append(total_ram_usage)
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w2/u-cs.txt', 'a') as f:
-            # d = durations[i]
-            r = total_ram_usage / (1024 * 1024)
-            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
+        # with open(f'{os.getcwd()}/results/w2/u-cs.txt', 'a') as f:
+        #     # d = durations[i]
+        #     r = total_ram_usage / (1024 * 1024)
+        #     f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
 
     print("Durations", durations)
     print("RAM Usage: ", rams)
-    # with open(f'{os.getcwd()}/results/w2/u-cs.txt', 'a') as f:
-    #     for i in range(durations.__len__()):
-    #         d = durations[i]
-    #         r = rams[i] / (1024 * 1024)
-    #         f.write(f"{d},{r}\n")
+    print("Mean of Durations: ", mean(durations))
 
 
 # MOST PROBABLE FR
@@ -136,7 +138,7 @@ def update_init_times(dag: DAG, init_times, ex_times, ram_usages, mutex, ram_usi
             c_idx, c_info, c_prob = children[0]
             # sleep_time = ex + cs - 0.5 if ex + cs - 0.5 > 0 else 0
             sleep_time = ex + cs - 1 if ex + cs - 1 > 0 else 0
-            time.sleep(sleep_time)
+            # time.sleep(sleep_time)
             # time.sleep(ex + cs)
             # time.sleep(cs)
 
@@ -177,6 +179,7 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         total_ram_usage = [0]
         total_cs_time = 0
         total_cs_count = 0
+        total_sim_time = 0
 
         mutex = threading.Lock()
         semaphore = threading.Semaphore(1)
@@ -193,8 +196,10 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         cprint(f'Running node: {i}', 'yellow')
         cprint(f"TIMES: {init_time} {run_time}", 'yellow')
-        time.sleep(init_time)
-        time.sleep(run_time)
+        # time.sleep(init_time)
+        # time.sleep(run_time)
+        total_sim_time += init_time
+        total_sim_time += run_time
         cprint(f"Node {i} finished running", 'yellow')
         print("")
 
@@ -232,8 +237,10 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
             cprint(f'Running node: {child}', 'yellow')
             cprint(f"TIMES: {init_time} {run_time}", 'yellow')
-            time.sleep(init_time)
-            time.sleep(run_time)
+            # time.sleep(init_time)
+            # time.sleep(run_time)
+            total_sim_time += init_time
+            total_sim_time += run_time
             cprint(f"Node {child} finished running", 'yellow')
 
             if child not in ram_using_nodes:
@@ -249,26 +256,21 @@ def most_probable_fr(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             print("")
             i = child
 
-        end_time = time.time()
-        d = end_time - start_time
+        # end_time = time.time()
+        # d = end_time - start_time
+        d = total_sim_time
         durations.append(d)
         rams.append(total_ram_usage[0])
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w2/u-probable.txt', 'a') as f:
-            # d = durations[i]
-            r = total_ram_usage[0] / (1024 * 1024)
-            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
+        # with open(f'{os.getcwd()}/results/w2/u-probable.txt', 'a') as f:
+        #     # d = durations[i]
+        #     r = total_ram_usage[0] / (1024 * 1024)
+        #     f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("RAM Usage List: ", rams)
-
-    # with open(f'{os.getcwd()}/results/w2/u-probable.txt', 'a') as f:
-    #     for i in range(durations.__len__()):
-    #         d = durations[i]
-    #         r = rams[i] / (1024 * 1024)
-    #         f.write(f"{d},{r}\n")
 
 
 def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_using_nodes, total_ram_usage, mutex, semaphore):
@@ -281,7 +283,7 @@ def update_init_time_optimal(dag: DAG, init_times, ex_times, ram_usages, ram_usi
     for node_idx, info, prob in cold_start_candidates:
         # Acquire the semaphore before updating the shared mean_init_time
         semaphore.acquire()
-        init_times[node_idx] = 0
+        init_times[node_idx] = [0]
         # Release the semaphore after the update is done
         semaphore.release()
 
@@ -327,7 +329,7 @@ def planner(node_idx, levels, ex_times, init_times):
         # sleep_time = ex + cs - 0.5 if ex + cs - 0.5 > 0 else 0
         sleep_time = ex + cs - 0.5 if ex + cs - 0.5 > 0 else 0
 
-        time.sleep(sleep_time)
+        # time.sleep(sleep_time)
 
         for c_idx, c_info, c_prob in children:
             init_times[c_idx] = [0]
@@ -354,6 +356,7 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
         total_ram_usage = [0]
         total_cs_time = 0
         total_cs_count = 0
+        total_sim_time = 0
 
         # Finding cold start candidates
         mutex = threading.Lock()
@@ -370,8 +373,10 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
 
         cprint(f'Running node: {i}', 'green')
         cprint(f"TIMES: {init_time} {run_time}", 'yellow')
-        time.sleep(init_time)
-        time.sleep(run_time)
+        # time.sleep(init_time)
+        # time.sleep(run_time)
+        total_sim_time += init_time
+        total_sim_time += run_time
         cprint(f"Node {i} finished running", 'green')
 
         if i not in ram_using_nodes:
@@ -407,8 +412,10 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             run_time = generate_random_sample(runtimes[child])
             cprint(f'Running node: {child}', 'green')
             cprint(f"TIMES {init_time} {run_time}", 'yellow')
-            time.sleep(init_time)
-            time.sleep(run_time)
+            # time.sleep(init_time)
+            # time.sleep(run_time)
+            total_sim_time += init_time
+            total_sim_time += run_time
             cprint(f"Node {child} finished running", 'green')
 
             if child not in ram_using_nodes:
@@ -423,17 +430,18 @@ def optimal(dag: DAG, dag_analysis: DAGAnalysis, error=0.2, iters=5):
             print("")
 
             i = child
-        end_time = time.time()
-        d = end_time - start_time
+        # end_time = time.time()
+        # d = end_time - start_time
+        d = total_sim_time 
         durations.append(d)
         rams.append(total_ram_usage[0])
         print("")
         cprint(f"------- TEST {iter} FINISHED -------", 'blue')
         print("")
-        with open(f'{os.getcwd()}/results/w2/u-optimal-parameters.txt', 'a') as f:
-            # d = durations[i]
-            r = total_ram_usage[0] / (1024 * 1024)
-            f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
+        # with open(f'{os.getcwd()}/results/w2/u-optimal-parameters.txt', 'a') as f:
+        #     # d = durations[i]
+        #     r = total_ram_usage[0] / (1024 * 1024)
+        #     f.write(f"{d},{r},{total_cs_time},{total_cs_count}\n")
     print("Durations: ", durations)
     print("Durations Mean: ", mean(durations))
     print("Total RAM: ", rams)
