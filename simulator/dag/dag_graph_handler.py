@@ -1,12 +1,14 @@
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
+from statistics import mean
 
 
 class DAGGraphHandler:
-    def __init__(self, adj_matrix) -> None:
+    def __init__(self, adj_matrix, dist_funcs=None) -> None:
         self.adj_matrix = adj_matrix
         self.G = self.get_graph_from_matrix(adj_matrix)
+        self.dist_funcs = dist_funcs
 
     def get_graph_from_matrix(self, adj_matrix):
         G = nx.DiGraph()
@@ -51,7 +53,7 @@ class DAGGraphHandler:
         else:
             return sum(edge[2]['weight'] for edge in self.G.out_edges(node_idx, data=True))
 
-    def get_most_probable_children(self, parent_idx=0, l=-1, alpha=0, beta=0, results=None):
+    def get_most_probable_children(self, parent_idx=0, l=-1, alpha=0, beta=0, gamma=0, results=None):
         if results is None:
             results = []
         parent_edges = list(self.G.out_edges(parent_idx, data=True))
@@ -78,11 +80,25 @@ class DAGGraphHandler:
                 max_prob_child, max_prob, max_prob_idx = child_probs[0][0], child_probs[0][2], 0
                 # print("Child Probs", child_probs)
                 for i in range(1, len(child_probs)):
-                    
-                    if max_prob >= beta and max_prob_child not in [r[0] for r in results]:
-                        results.append(
-                            (max_prob_child, child_probs[i-1][1], max_prob))
-                        current_level_results.append((max_prob_child, child_probs[i-1][1], max_prob))
+
+                    if self.dist_funcs != None:
+                        cs_mean = mean(
+                            self.dist_funcs['cold_start'][max_prob_child])
+                        ex_mean = mean(
+                            self.dist_funcs['ex_time'][max_prob_child])
+                        cs_power = cs_mean / ex_mean
+
+                        if max_prob >= beta and cs_power >= gamma and max_prob_child not in [r[0] for r in results]:
+                            results.append(
+                                (max_prob_child, child_probs[i-1][1], max_prob))
+                            current_level_results.append(
+                                (max_prob_child, child_probs[i-1][1], max_prob))
+                    else:
+                        if max_prob >= beta and max_prob_child not in [r[0] for r in results]:
+                            results.append(
+                                (max_prob_child, child_probs[i-1][1], max_prob))
+                            current_level_results.append(
+                                (max_prob_child, child_probs[i-1][1], max_prob))
 
                     curr_prob_child, curr_prob = child_probs[i][0], child_probs[i][2]
 
@@ -90,31 +106,58 @@ class DAGGraphHandler:
                         break
                     if curr_prob < beta:
                         continue
+
+                    if self.dist_funcs != None:
+                        cs_mean = mean(
+                            self.dist_funcs['cold_start'][curr_prob_child])
+                        ex_mean = mean(
+                            self.dist_funcs['ex_time'][curr_prob_child])
+
+                        if cs_mean / ex_mean < gamma:
+                            continue
+
                     # if max_prob_child not in [r[0] for r in results]:
                     #     results.append((max_prob_child, child_probs[i-1][1], max_prob))
                     max_prob_child, max_prob, max_prob_idx = curr_prob_child, curr_prob, i
 
-                if max_prob >= beta and max_prob_child not in [r[0] for r in results]:
-                    results.append(
-                        (max_prob_child, child_probs[max_prob_idx][1], max_prob))
-                    current_level_results.append((max_prob_child, child_probs[i-1][1], max_prob))
+                if self.dist_funcs != None:
+                    cs_mean = mean(
+                        self.dist_funcs['cold_start'][max_prob_child])
+                    ex_mean = mean(
+                        self.dist_funcs['ex_time'][max_prob_child])
+                    cs_power = cs_mean / ex_mean
+
+                    if max_prob >= beta and cs_power >= gamma and max_prob_child not in [r[0] for r in results]:
+                        results.append(
+                            (max_prob_child, child_probs[max_prob_idx][1], max_prob))
+                        current_level_results.append(
+                            (max_prob_child, child_probs[i-1][1], max_prob))
+
+                else:
+                    if max_prob >= beta and max_prob_child not in [r[0] for r in results]:
+                        results.append(
+                            (max_prob_child, child_probs[max_prob_idx][1], max_prob))
+                        current_level_results.append(
+                            (max_prob_child, child_probs[i-1][1], max_prob))
 
                 if l != -1 and l <= 1:
                     return results
                 elif l == -1:
                     # Latest
                     # return self.get_most_probable_children(parent_idx=final_max_prob_child, l=l, alpha=alpha,beta=beta, results=results)
-                    
+
                     for child, prob, prob_idx in current_level_results:
-                        self.get_most_probable_children(parent_idx=child, l=l, alpha=alpha,beta=beta, results=results)
+                        self.get_most_probable_children(
+                            parent_idx=child, l=l, alpha=alpha, beta=beta, gamma=gamma, results=results)
                     return results
-                    
+
                 else:
                     # Latest
                     # return self.get_most_probable_children(parent_idx=final_max_prob_child, l=l-1, alpha=alpha, beta=beta, results=results)
-                    
+
                     for child, prob, prob_idx in current_level_results:
-                        self.get_most_probable_children(parent_idx=child, l=l-1, alpha=alpha, beta=beta, results=results)
+                        self.get_most_probable_children(
+                            parent_idx=child, l=l-1, alpha=alpha, beta=beta, gamma=gamma, results=results)
                     return results
 
                     # else:
@@ -170,7 +213,7 @@ class DAGGraphHandler:
         return self.adj_matrix, self.G
 
     # Only gets the most probable nodes (Cold Start Candidates)
-    def handle_cold_start_request(self, parent_idx: int=0,  alpha: int=0, beta: int=0, l: int=-1):
+    def handle_cold_start_request(self, parent_idx: int = 0,  alpha: int = 0, beta: int = 0, gamma: int = 0, l: int = -1):
         if alpha < 0 or alpha > 100:
             raise "alpha should be in range of 0 to 100"
 
@@ -183,11 +226,14 @@ class DAGGraphHandler:
         if parent_idx <= -1:
             raise "Parent index should be a valid index"
 
+        if gamma < 0:
+            raise "Gamma should be at least 0"
+
         cold_start_candidates = self.get_most_probable_children(
-            parent_idx=parent_idx, l=l, alpha=alpha, beta=beta)
+            parent_idx=parent_idx, l=l, alpha=alpha, gamma=gamma, beta=beta)
 
         return cold_start_candidates
-    
+
     # Update the matrix and gets the most probable graphs
     # def hanle_update_matrix_and_get_cold_start_cnandidates(self, from_node: int, to_node: int, alpha: int, beta: int, l: int):
     #     adj_matrix, G = self.update_graph_by_request(
@@ -207,3 +253,51 @@ class DAGGraphHandler:
 
     #     return adj_matrix, G, cold_start_candidates
 
+    def xanadu_most_probable(self, parent_index=0, l=-1, results=None, probs=None):
+        if results is None:
+            results = []
+            probs = {0: 1}
+
+        edges_of_parent = list(self.G.out_edges(parent_index, data=True))
+        children = list(self.G.successors(parent_index))
+
+        if len(children) == 0 or l == 0:
+            return results
+
+        child_probs = []
+        for i, edge in enumerate(edges_of_parent):
+            child_idx = edge[1]
+            # Get the parents for the current child
+            incoming_edges = self.G.in_edges(child_idx, data=True)
+            node_l = 0
+
+            # iterate over the parents
+            for source, _, info in incoming_edges:
+                # Get the total incoming weights for the parent
+                parent_total_incoming_weight = self.get_the_complete_incoming_weight(
+                    source)
+
+                # Find the probability of transition from the parent to the current child
+                prob = info['weight'] / parent_total_incoming_weight
+                # add it to the probability for the child
+                node_l += prob
+
+            total_prob = node_l * probs[parent_index]
+            child_probs.append((children[i], edge, total_prob))
+
+        child_probs = sorted(child_probs, key=lambda x: x[2], reverse=True)
+        
+        most_probable_child = child_probs[0]
+        child, edge, prob = most_probable_child
+        results.append(most_probable_child)
+        probs[child] = prob
+
+        if l == -1:
+            results = self.xanadu_most_probable(
+                parent_index=child, l=l, results=results, probs=probs)
+            return results
+
+        elif l >= 1:
+            results = self.xanadu_most_probable(
+                parent_index=child, l=l-1, results=results, probs=probs)
+            return results

@@ -9,7 +9,7 @@ class FlowDistFunc:
     def __init__(self, adj_matrix, image_vector, dist_funcs, dag_id=None) -> None:
         self.adj_matrix = adj_matrix
         self.image_vector = image_vector
-        self.dag = DAG(adj_matrix, image_vector, dag_id)
+        self.dag = DAG(adj_matrix, image_vector, dag_id, dist_funcs)
         self.dist_funcs = dist_funcs
 
     def set_flow_runner(self, flow_runner: FunctionType):

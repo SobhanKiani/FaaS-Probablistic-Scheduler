@@ -2,16 +2,18 @@ import redis
 import uuid
 import json
 from dag.dag_graph_handler import DAGGraphHandler
+import numpy as np
 
 
 class DAG:
-    def __init__(self, adj_matrix: list = None, image_vector: list = None, dag_id: str = None) -> None:
+    def __init__(self, adj_matrix: list = None, image_vector: list = None, dag_id: str = None, dist_funcs: list = None) -> None:
         # Gets A DAG As Input
         if adj_matrix and image_vector:
             self.adj_matrix = adj_matrix
             self.image_vector = image_vector
             self.redis_client = redis.Redis(
                 host='localhost', port=32768, username='default', password='redispw')
+            self.dist_funcs = dist_funcs
             self.dag_wfh: DAGGraphHandler = self.to_graph_handler()
 
         # Gets DAG ID As Input
@@ -62,7 +64,8 @@ class DAG:
 
     # Creates a DAGGraphHanlder From The DAG
     def to_graph_handler(self):
-        self.dag_wfh = DAGGraphHandler(self.adj_matrix)
+        self.dag_wfh = DAGGraphHandler(
+            self.adj_matrix, dist_funcs=self.dist_funcs)
         return self.dag_wfh
 
     # Gets a transition and updates the matrix
@@ -88,9 +91,9 @@ class DAG:
         return self.adj_matrix
 
     # Only gets cold start candidates
-    def get_cold_start_candidates(self, parent_idx: int,  alpha: int = 0, beta: int = 0, l: int = -1):
+    def get_cold_start_candidates(self, parent_idx: int,  alpha: int = 0, beta: int = 0, gamma: int = 0, l: int = -1):
         candidates = self.dag_wfh.handle_cold_start_request(
-            parent_idx=parent_idx, alpha=alpha, beta=beta, l=l)
+            parent_idx=parent_idx, alpha=alpha, beta=beta, gamma=gamma, l=l)
         return candidates
 
     # Update the matrix and get the cold start candidates
@@ -100,6 +103,39 @@ class DAG:
             parent_idx=to_node, alpha=alpha, beta=beta, l=l)
 
         return cold_start_candidates
+
+    def get_xanadu_cold_start_candidates(self, parent_idx: int, l: int = -1):
+        # probs = {}
+        # for node in self.dag_wfh.G.nodes():
+        #     if node == 0:
+        #         probs[0] = {
+        #             'l': 0,
+        #             'prob_from_parents': {}
+        #         }
+        #     else:
+        #         incoming_edges = self.dag_wfh.G.in_edges(node)
+        #         total_prob_from_parents = 0
+        #         for source, _, info in incoming_edges:
+        #             # Get the total incoming weights for the parent
+        #             parent_total_incoming_weight = self.dag_wfh.get_the_complete_incoming_weight(
+        #                 source)
+
+        #             # Find the probability of transition from the parent to the current child
+        #             prob = info['weight'] / parent_total_incoming_weight * 100
+        #             # add it to the probability for the child
+        #             total_prob_from_parents += prob
+                
+        #         probs[node] = {
+        #             'l':total_prob_from_parents,
+        #             'prob_from_parents': {}
+        #         }
+                    
+        #         for source, _, info in incoming_edges:
+        #             probs[node]['prob_from_parents'][source] = total_prob_from_parents * probs[source]
+                    
+                
+
+        return self.dag_wfh.xanadu_most_probable(parent_index=parent_idx, l=l)
 
     # Updates the matrix and gets the cold start candidates using
     # hanle_update_matrix_and_get_cold_start_cnandidates method of DAGGraphHandler

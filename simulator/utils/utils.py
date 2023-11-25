@@ -52,9 +52,13 @@ def send_get_request(url):
 
 
 def generate_random_sample(data):
-    if set(data) == {0}:
-        return 0.0
-    
+    if type(data) == int:
+        if data == 0:
+            return 0
+    elif type(data) == list:
+        if all(data) == 0 or set(data) == {0}:
+            return 0.0
+
     # cprint( data, 'cyan')
     # Calculate mean and standard deviation of past start times
     # mean = np.mean(data)
@@ -63,7 +67,7 @@ def generate_random_sample(data):
     mean_data = mean(data)
     std_dev_data = stdev(data)
     # print("G", mean_data, std_dev_data)
-    
+
     generated_num = np.random.normal(mean_data, std_dev_data)
 
     # Create normal distribution object with calculated mean and standard deviation
@@ -71,8 +75,7 @@ def generate_random_sample(data):
 
     # # # Generate a new random start time for a container
     # generated_num = norm_dist.rvs()
-    
-    
+
     return generated_num
 
 
@@ -98,6 +101,3 @@ equal_adj_matrix = [
 ]
 equal_image_vector = ['f1:latest', 'f1:latest', 'f1:latest',
                       'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest', 'f1:latest',]
-
-
-
