@@ -2,6 +2,8 @@ import requests
 import time
 import numpy as np
 from scipy.stats import norm
+from termcolor import cprint
+from statistics import mean, stdev
 
 adj_matrix = [
     [-1, 100, -1, -1, -1, -1, -1, -1],
@@ -50,19 +52,33 @@ def send_get_request(url):
 
 
 def generate_random_sample(data):
-    if set(data) == {0}:
-        return 0.0
+    if type(data) == int:
+        if data == 0:
+            return 0
+    elif type(data) == list:
+        if all(data) == 0 or set(data) == {0}:
+            return 0.0
+
+    # cprint( data, 'cyan')
     # Calculate mean and standard deviation of past start times
-    mean = np.mean(data)
-    std_dev = np.std(data)
+    # mean = np.mean(data)
+    # std_dev = np.std(data)
+
+    mean_data = mean(data)
+    std_dev_data = stdev(data)
+    # print("G", mean_data, std_dev_data)
+
+    generated_num = np.random.normal(mean_data, std_dev_data)
 
     # Create normal distribution object with calculated mean and standard deviation
-    norm_dist = norm(loc=mean, scale=std_dev)
+    # norm_dist = norm(loc=mean_data, scale=std_dev_data)
 
-    # Generate a new random start time for a container
-    new_start_time = norm_dist.rvs()
+    # # # Generate a new random start time for a container
+    # generated_num = norm_dist.rvs()
 
-    return new_start_time
+    return generated_num
+
+
 # equal_adj_matrix = [
 #     [-1, 100, -1, -1, -1, -1, -1, -1],
 #     [-1, -1, 49, 51, -1, -1, -1, -1],

@@ -14,8 +14,13 @@ coverage = "*"
 docker = "*"
 redis = "*"
 scipy = "*"
+colorama = "*"
+termcolor = "*"
+pandas = "*"
+sklearn = "*"
 
 [dev-packages]
+ipykernel = "*"
 
 [requires]
 python_version = "3.9"

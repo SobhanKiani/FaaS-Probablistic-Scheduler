@@ -124,6 +124,25 @@ class ContainerAnalysis:
             f"{self.base_key}_0:duration", 0, -1)
         running_times_decoded = [float(d.decode()) for d in running_times]
         return running_times_decoded
+    
+    def caluclate_both_times(self, iters, host_add, container_add):
+        # Deleting times stored in the past
+        self.redis_client.delete(f"{self.base_key}:duration")
+        self.redis_client.delete(f"{self.base_key}:init")
+
+        self.running_time_file_addr = host_add
+
+        for i in range(iters):
+            print(f"Iteration Number: {i}")
+
+            # Calculating CS time
+            init_time = self.get_initialization_time()
+            self.store(f"{self.base_key}_{self.node_idx}:init", init_time)
+
+            # Calculating EX Time
+            self.get_running_time(f'{self.running_time_file_addr}/:{container_add}')
+        
+
 
     def get_mean_init_time(self,):
         init_times = self.get_all_init_times_list()

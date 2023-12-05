@@ -1,6 +1,6 @@
 from dag.dag import DAG
 from analysors.dag_analysis import DAGAnalysis
-from analysors.container_analysis import ContainerAnalysis
+from analysors.container_analysis_refined import ContainerAnalysis
 from types import FunctionType
 import time
 
@@ -12,21 +12,39 @@ class Flow:
         self.dag = DAG(self.adj_matrix, self.image_vector, dag_id)
         self.dag_analysis = DAGAnalysis(self.dag, Analysis=Analysis)
 
-    def analyze_dag(self, iter=100):
+    def analyze_dag(self, iter=100, wf_folder_name='w1'):
         # try:
-        self.dag_analysis.analyze_run_times(iter, 3)
-        self.dag_analysis.analyze_init(iter)
+        # self.dag_analysis.analyze_run_times(iter, 3, 'w1')
+        # self.dag_analysis.analyze_init(iter)
+        # self.dag_analysis.analyse_both_times(iter, 3, wf_folder_name)
+        self.dag_analysis.analyze_all_data(iter, 3, wf_folder_name)
         self.mean_init_time = self.dag_analysis.get_init_time_mean()
         self.mean_run_time = self.dag_analysis.get_run_time_mean()
+        self.mean_ram_usage = self.dag_analysis.get_ram_usage_mean()
         # except:
         #     return "Error"
+        
+    def analyze_dag_mem(self, iters=100):
+        self.dag_analysis.anaylyze_mem(iters)
 
     def set_flow_runner(self, flow_runner: FunctionType):
         self.flow_runner = flow_runner
 
     def start_flow_runner(self, iters=None):
         start_time = time.time()
-        self.flow_runner(self.dag, self.dag_analysis)
+        self.flow_runner(self.dag, self.dag_analysis, iters=iters)
         end_time = time.time()
         self.last_duration = end_time - start_time
         print("Duration Of The Flow: ", self.last_duration)
+
+    def plot_init_histogram(self, image_name, node_idx):
+        ca = ContainerAnalysis(image_name, node_idx)
+        ca.plot_init_time_hist()
+
+    def plot_runtime_histogram(self, image_name, node_idx):
+        ca = ContainerAnalysis(image_name, node_idx)
+        ca.plot_runtime_hist()
+        
+    def plot_ram_usage_histogram(self, image_name, node_idx):
+        ca = ContainerAnalysis(image_name, node_idx)
+        ca.plot_ram_usage_hist()
