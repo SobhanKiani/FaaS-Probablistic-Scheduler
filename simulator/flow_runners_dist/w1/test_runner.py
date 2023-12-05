@@ -8,7 +8,7 @@ import random
 from termcolor import cprint
 from .utils import Job, store_in_file
 
- 
+
 def time_handler(jobs: Queue, total_durations: list, total_rams: list, total_cs_counts: list, total_cs_durations: list, ):
     flow_ram_value = []  # The time and amount of ram allocation to each node
     flow_ram_usage = 0  # Total Usage Of RAM
