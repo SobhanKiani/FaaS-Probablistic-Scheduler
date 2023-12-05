@@ -12,12 +12,13 @@ class FlowDistFunc:
         self.dag = DAG(adj_matrix, image_vector, dag_id, dist_funcs)
         self.dist_funcs = dist_funcs
 
-    def set_flow_runner(self, flow_runner: FunctionType):
+    def set_flow_runner(self, flow_runner: FunctionType, warming_approach=None):
         self.flow_runner = flow_runner
+        self.warming_approach = warming_approach
 
-    def start_flow_runner(self, iters=None):
-        self.flow_runner(self.dag, self.dist_funcs, iters=iters)
-
+    def start_flow_runner(self, iters=None, store_file_path=None):
+        self.flow_runner(self.dag, self.dist_funcs, iters=iters,
+                         warming_approach=self.warming_approach, store_file_path=store_file_path)
 
     def plot_init_histogram(self, node_idx):
         dist_function = self.dist_funcs['cold_start'][node_idx]

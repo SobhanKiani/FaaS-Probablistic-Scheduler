@@ -172,7 +172,7 @@ class DAGGraphHandler:
             parent_idx=parent_idx, l=l, alpha=alpha, beta=beta)
 
         return cold_start_candidates
-    
+
     # Update the matrix and gets the most probable graphs
     # def hanle_update_matrix_and_get_cold_start_cnandidates(self, from_node: int, to_node: int, alpha: int, beta: int, l: int):
     #     adj_matrix, G = self.update_graph_by_request(
@@ -191,4 +191,3 @@ class DAGGraphHandler:
     #         to_node, l, alpha, beta)
 
     #     return adj_matrix, G, cold_start_candidates
-
