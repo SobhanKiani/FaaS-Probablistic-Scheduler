@@ -20,7 +20,7 @@ if __name__ == '__main__':
     f_cold_start = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_cold_start.set_flow_runner(random_runner, warming_approach=None)
     f_cold_start.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w2/random/1/cold-start.txt')
+        iters=iters, store_file_path='./new-results/w2/random/2/cold-start.txt')
     cprint(
         f"COLD START TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     f_mlp = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_mlp.set_flow_runner(random_runner, warming_approach=mlp)
     f_mlp.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w2/random/1/mlp.txt')
+        iters=iters, store_file_path='./new-results/w2/random/2/mlp.txt')
     cprint(f"MLP TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     f_all = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_all.set_flow_runner(random_runner, warming_approach=warming_all_approach)
     f_all.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w2/random/1/warming-all.txt')
+        iters=iters, store_file_path='./new-results/w2/random/2/warming-all.txt')
     cprint(
         f"WARMING ALL TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     f_optimal = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_optimal.set_flow_runner(random_runner, warming_approach=optimal_approach)
     f_optimal.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w2/random/1/optimal.txt')
+        iters=iters, store_file_path='./new-results/w2/random/2/optimal.txt')
     cprint(f"OPTIMAL TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
     # ---------------------------------------------------------------------
@@ -57,7 +57,9 @@ if __name__ == '__main__':
     ############################
     # ---------------------------------------------------------------------
     # iters = 500
-    # path = [0, 1, 0, 1, 4]
+    # # path = [0, 1, 0, 1, 4]
+    # # path = [1, 0, 0, 0, 0]
+    # path = [0, 0]
 
     # print("PATH TEST")
     # print("--------------------------------------------------------------------")
@@ -66,7 +68,7 @@ if __name__ == '__main__':
     # f_cold_start.set_flow_runner(
     #     path_runner_wrapper(path=path), warming_approach=None)
     # f_cold_start.start_flow_runner(
-    #     iters=iters, store_file_path='./new-results/w2/path/1/cold-start.txt')
+    #     iters=iters, store_file_path='./new-results/w2/path/3/cold-start.txt')
     # cprint(
     #     f"COLD START TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     # print("----------------")
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     # f_mlp = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     # f_mlp.set_flow_runner(path_runner_wrapper(path=path), warming_approach=mlp)
     # f_mlp.start_flow_runner(
-    #     iters=iters, store_file_path='./new-results/w2/path/1/mlp.txt')
+    #     iters=iters, store_file_path='./new-results/w2/path/3/mlp.txt')
     # cprint(f"MLP TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     # print("----------------")
     # print("")
@@ -86,7 +88,7 @@ if __name__ == '__main__':
     # f_all.set_flow_runner(path_runner_wrapper(path=path),
     #                       warming_approach=warming_all_approach)
     # f_all.start_flow_runner(
-    #     iters=iters, store_file_path='./new-results/w2/path/1/warming-all.txt')
+    #     iters=iters, store_file_path='./new-results/w2/path/3/warming-all.txt')
     # cprint(
     #     f"WARMING ALL TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     # print("----------------")
@@ -97,7 +99,7 @@ if __name__ == '__main__':
     # f_optimal.set_flow_runner(
     #     path_runner_wrapper(path=path), warming_approach=optimal_approach)
     # f_optimal.start_flow_runner(
-    #     iters=iters, store_file_path='./new-results/w2/path/1/optimal.txt')
+    #     iters=iters, store_file_path='./new-results/w2/path/3/optimal.txt')
     # cprint(f"OPTIMAL TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     # print("----------------")
     # ---------------------------------------------------------------------

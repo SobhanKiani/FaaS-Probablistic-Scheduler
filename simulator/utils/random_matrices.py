@@ -299,7 +299,8 @@ random_dag_2_cs = [
 #     gnd(10, 4, 6, 500),
 # ]
 
-random_dag_2_ram = [gnd(5, 4, 6, 500)] * 15
+# random_dag_2_ram = [gnd(5, 4, 6, 500)] * 15
+random_dag_2_ram = [gnd(256, 256, 256, 500)] * 15
 
 w2_dist_funcs = {
     'cold_start': random_dag_2_cs,

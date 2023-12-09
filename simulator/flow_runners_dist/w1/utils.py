@@ -1,3 +1,5 @@
+import random
+from dag.dag import DAG
 import os
 from queue import Queue
 from typing import Optional, List, Tuple
@@ -163,7 +165,7 @@ def execution_handler(w: WorkflowData, node: int, cs: float, ex: float):
             else:
                 print("h3")
                 cs = last_sim_time - ram_data.alloc_time
-                
+
         custom_print(
             f'Ram Data For Node: {node} , Amount: {ram_data.amount}, Alloc Time: {ram_data.alloc_time}, Last Alloc Time {last_alloc_time},  Level {ram_data.level}', show=show_print)
 
@@ -199,7 +201,7 @@ def execution_handler(w: WorkflowData, node: int, cs: float, ex: float):
                 sibling_up_duration = last_sim_time - sibling.alloc_time
             else:
                 sibling_up_duration = 0
-                
+
             sibling_up_duration = (w.sim_time - sibling.alloc_time)
             sibling.up_duration = sibling_up_duration
 
@@ -272,6 +274,27 @@ def time_handler(jobs: Queue, total_durations: list, total_rams: list, total_cs_
     total_cost.append(workflow_data.cost)
 
 
-# به عنوان ورودی به صف باید خود جریان کاری رو هم بدیم
-# بعد وقتی هر گره اجرا شد بیایم برادرشو هم پیدا کنیم
-# به اندازه اونا هم رم اضافه کنیم
+def path_generator(dag_main: DAG):
+    path = []
+    dag = dag_main
+    i = 0
+
+    # Running other nodes
+    while True:
+        # Getting the list of edges for the current node
+        edges = list(dag.dag_wfh.G.out_edges(i, data=True))
+        if len(edges) == 0:
+            break
+
+        edge_weights = [edge[2]['weight'] for edge in edges]
+
+        # Randomly choose an edge based on the weights
+        chosen_index = random.choices(
+            range(len(edge_weights)), weights=edge_weights, k=1)[0]
+        path.append(chosen_index)
+        # Get the chose child
+        chosen = edges[chosen_index]
+        _, child, _ = chosen
+
+        # Set the child to be the parent for the next iteration
+        i = child
