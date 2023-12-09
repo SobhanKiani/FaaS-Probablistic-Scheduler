@@ -165,8 +165,8 @@ random_dag_cs = [
 #     gnd(5, 4.75, 5.25, 500),
 # ]
 
-random_dag_ram = [gnd(1024, 512, 2048, 500)] * 13
-# random_dag_ram = [gnd(512, 512, 512, 500)] * 13
+# random_dag_ram = [gnd(1024, 512, 2048, 500)] * 13
+random_dag_ram = [gnd(512, 512, 512, 500)] * 13
 
 
 w1_dist_funcs = {

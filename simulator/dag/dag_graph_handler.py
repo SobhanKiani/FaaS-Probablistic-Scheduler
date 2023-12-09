@@ -360,12 +360,16 @@ class DAGGraphHandler:
                 cs = mean(self.dist_funcs['cold_start'][c_index])
                 ex = mean(self.dist_funcs['ex_time'][c_index])
 
-                if diff <= alpha and curr_child[2] >= beta and cs/ex > gamma and curr_child[0] not in seen_nodes:
+                # if diff <= alpha and curr_child[2] >= beta and cs/ex > gamma and curr_child[0] not in seen_nodes:
+                if curr_child[2] < beta:
+                    break
+                
+                if diff <= alpha and cs/ex > gamma and curr_child[0] not in seen_nodes:
                     nodes.append((curr_child))
                     q.append((curr_child, l+1))
                     seen_nodes.add(curr_child[0])
                 else:
-                    break
+                    continue
 
         return nodes
 

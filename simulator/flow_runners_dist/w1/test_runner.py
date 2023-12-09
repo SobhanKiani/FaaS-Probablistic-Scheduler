@@ -6,127 +6,151 @@ from utils.utils import generate_random_sample
 from statistics import mean
 import random
 from termcolor import cprint
-from .utils import Job, store_in_file
+from .utils import Job, store_in_file, JobTopics, time_handler
 
 
-def time_handler(jobs: Queue, total_durations: list, total_rams: list, total_cs_counts: list, total_cs_durations: list, ):
-    flow_ram_value = []  # The time and amount of ram allocation to each node
-    flow_ram_usage = 0  # Total Usage Of RAM
-    flow_cs_time = 0
-    flow_cs_count = 0
-    flow_sim_time = 0
+# def time_handler(jobs: Queue, total_durations: list, total_rams: list, total_cs_counts: list, total_cs_durations: list, ):
+#     flow_ram_value = []  # The time and amount of ram allocation to each node
+#     flow_ram_usage = 0  # Total Usage Of RAM
+#     flow_cs_time = 0
+#     flow_cs_count = 0
+#     flow_sim_time = 0
 
-    while True:
-        item: Job = jobs.get()
-        if item.topic == 'Finish':
-            print("Flow Finished")
-            print("")
-            break
-        else:
-            if item.topic == 'CS':
-                if item.value > 0:
-                    flow_cs_time += item.value
-                    flow_cs_count += 1
-                    flow_sim_time += item.value
+#     while True:
+#         item: Job = jobs.get()
+#         if item.topic == 'Finish':
+#             print("Flow Finished")
+#             print("")
+#             break
+#         else:
+#             if item.topic == 'CS':
+#                 if item.value > 0:
+#                     flow_cs_time += item.value
+#                     flow_cs_count += 1
+#                     flow_sim_time += item.value
 
-            elif item.topic == 'EX':
-                flow_sim_time += item.value
+#             elif item.topic == 'EX':
+#                 flow_sim_time += item.value
 
-            elif item.topic == 'RAM_START':
-                curr_rds = [rd for rd in flow_ram_value if rd['node']
-                            == item.value['node']]
+#             elif item.topic == 'RAM_START':
+#                 curr_rds = [rd for rd in flow_ram_value if rd['node']
+#                             == item.value['node']]
 
-                if curr_rds.__len__() == 0:
-                    print("Adding ram for node: ",
-                          item.value['node'], ",", item.value['amount'])
-                    ram_data = {
-                        "node": item.value['node'],
-                        'amount': item.value['amount'],
-                        'allocation_start_time': flow_sim_time
-                    }
-                    flow_ram_value.append(ram_data)
-                    flow_ram_usage += item.value['amount']
+#                 if curr_rds.__len__() == 0:
+#                     print("RAM START - Ram Allocation For Node: ",
+#                           item.value['node'], ",", item.value['amount'], ',', f'allocation start time {flow_sim_time}')
+#                     ram_data = {
+#                         "node": item.value['node'],
+#                         'amount': item.value['amount'],
+#                         'allocation_start_time': flow_sim_time,
+#                     }
+#                     flow_ram_value.append(ram_data)
 
-            elif item.topic == 'RAM_START_BY_TIME':
-                print("Adding ram for node: ",
-                      item.value['node'], ",", item.value['amount'], "Time: ", item.value['time'])
+#                     # this is for the time when we don't want to consider time in ram usages
+#                     # flow_ram_usage += item.value['amount']
 
-                curr_rds = [rd for rd in flow_ram_value if rd['node']
-                            == item.value['node']]
-                if curr_rds.__len__() == 0:
-                    ram_data = {
-                        'node': item.value['node'],
-                        'amount': item.value['amount'],
-                        'allocation_start_time': item.value['time']
-                    }
-                    flow_ram_value.append(ram_data)
-                    flow_ram_usage += item.value['amount']
+#             elif item.topic == 'RAM_START_BY_TIME':
+#                 curr_rds = [rd for rd in flow_ram_value if rd['node']
+#                             == item.value['node']]
+#                 if curr_rds.__len__() == 0:
+#                     ram_data = {
+#                         'node': item.value['node'],
+#                         'amount': item.value['amount'],
+#                         'allocation_start_time': item.value['time']
+#                     }
+#                     flow_ram_value.append(ram_data)
+#                     print("RMA START BY TIME - Ram Allocation For Node: ",
+#                           item.value['node'], ",", item.value['amount'], "Time: ", item.value['time'])
+#                     # this is for the time when we don't want to consider time in ram usages
+#                     # flow_ram_usage += item.value['amount']
 
-                else:
-                    curr_rd = curr_rds[0]
-                    if curr_rd['allocation_start_time'] > item.value['time']:
-                        # Remove the last ram data of the node
-                        keeping_rds = [rd for rd in flow_ram_value if rd['node']
-                                       != item.value['node']]
-                        # Add the new one
-                        keeping_rds.append({
-                            'node': item.value['node'],
-                            'amount': item.value['amount'],
-                            'allocation_start_time': item.value['time']
-                        })
+#                 # else:
+#                 #     curr_rd = curr_rds[0]
+#                 #     if curr_rd['allocation_start_time'] > item.value['time']:
+#                 #         # Remove the last ram data of the node
+#                 #         keeping_rds = [rd for rd in flow_ram_value if rd['node']
+#                 #                        != item.value['node']]
+#                 #         # Add the new one
+#                 #         keeping_rds.append({
+#                 #             'node': item.value['node'],
+#                 #             'amount': item.value['amount'],
+#                 #             'allocation_start_time': item.value['time']
+#                 #         })
 
-            elif item.topic == 'RAM_END':
-                ram_start_data = [
-                    ram_data for ram_data in flow_ram_value if ram_data['node'] == item.value['node']][0]
+#             elif item.topic == 'RAM_END':
+#                 ram_start_data = [
+#                     ram_data for ram_data in flow_ram_value if ram_data['node'] == item.value['node']][0]
 
-                if ram_start_data and ram_start_data['allocation_start_time'] < flow_sim_time:
-                    # ram_usage = (
-                    #     flow_sim_time - ram_start_data['allocation_start_time']) * ram_start_data['amount']
-                    ram_usage = ram_start_data['amount']
-                    # flow_ram_usage += ram_usage
+#                 if ram_start_data:
+#                     # ram_usage = item.value['ram_duration'] * ram_data['amount']
+#                     ram_duration = abs(
+#                         flow_sim_time - ram_start_data['allocation_start_time'])
+#                     ram_usage = ram_duration * ram_data['amount']
+#                     flow_ram_usage += ram_usage
+#                     cprint(
+#                         f"RAM END FOR NODE {ram_data['node']}: RAM {ram_start_data['amount']}, DURATION {ram_duration}, SIM TIME {flow_sim_time}, ALLOCATION TIME {ram_start_data['allocation_start_time']} , TOTAL {ram_usage} ", 'green')
+#                     cprint(f"Flow Time: {flow_sim_time}", 'white',
+#                            on_color='on_cyan', attrs={'underline'})
+#                     print("")
 
-    cprint(f"FLOW RAM VALUE: {flow_ram_value}", 'red')
-    total_durations.append(flow_sim_time)
-    total_rams.append(flow_ram_usage)
-    total_cs_counts.append(flow_cs_count)
-    total_cs_durations.append(flow_cs_time)
+# cprint(f"FLOW RAM VALUE: {flow_ram_value}", 'red')
+# total_durations.append(flow_sim_time)
+# total_rams.append(flow_ram_usage)
+# total_cs_counts.append(flow_cs_count)
+# total_cs_durations.append(flow_cs_time)
 
-    jobs.put(Job(topic="FLOW ENDED", value=None))
+# jobs.put(Job(topic="FLOW ENDED", value=None))
 
-    # print(total_durations)
-    # print(total_rams)
-    # print(total_cs_durations)
-    # print(total_cs_counts)
+# print(total_durations)
+# print(total_rams)
+# print(total_cs_durations)
+# print(total_cs_counts)
 
 
-def allocate_function(node: int, ex: float, cs: float, ram: float, jobs: Queue):
-    jobs.put(Job(topic='RAM_START', value={'node': node, 'amount': ram}))
-    cprint(f'RAM Allocated For Node {node}: {ram}', 'yellow')
+def allocate_function(node: int, ex: float, cs: float, ram: float, jobs: Queue, level: int):
+    jobs.put(Job(topic=JobTopics.RAM_START, value={
+             'node': node, 'amount': ram, 'alloc_time': None, 'level': level}))
 
-    jobs.put(Job(topic='CS', value=cs))
-    cprint(f'CS For Node {node}: {cs}', 'blue')
+    jobs.put(
+        Job(
+            topic=JobTopics.EXECUTION,
+            value={
+                'node': node,
+                'cs': cs,
+                'ex': ex,
+                'amount': ram,
+                'alloc_time': None,
+                'level': level
+            }
+        )
 
-    jobs.put(Job(topic='EX', value=ex))
-    cprint(f'EX For Node {node}: {ex}', 'cyan')
+    )
+    # jobs.put(Job(topic='CS', value=cs))
+    # cprint(f'CS For Node {node}: {cs}', 'blue')
 
-    jobs.put(Job(topic='RAM_END', value={'node': node}))
-    cprint(f'RAM Regained For Node {node}', 'green')
-    print("")
+    # jobs.put(Job(topic='EX', value=ex))
+    # cprint(f'EX For Node {node}: {ex}', 'cyan')
+
+    # jobs.put(Job(topic='RAM_END', value={
+    #          'node': node, 'ram_duration': cs + ex}))
+    # cprint(f'RAM Regained From Node {node}', 'green')
 
 
 def random_runner(dag_main: DAG, dist_funcs, warming_approach=None, iters=100, store_file_path=None):
 
     total_durations = []
     total_rams = []
+    total_compute_cost = []
     total_cs_counts = []
     total_cs_durations = []
+    total_cost = []
 
     dag = copy.copy(dag_main)
 
     for iter in range(iters):
         jobs = Queue()
         time_handler_thread = Thread(target=time_handler, args=(
-            jobs, total_durations, total_rams, total_cs_counts, total_cs_durations))
+            jobs, total_durations, total_rams, total_cs_counts, total_cs_durations, total_compute_cost, total_cost))
         time_handler_thread.start()
 
         cs_times = dist_funcs['cold_start'].copy()
@@ -140,6 +164,7 @@ def random_runner(dag_main: DAG, dist_funcs, warming_approach=None, iters=100, s
             cs_candidates_thread.join()
 
         i = 0
+        max_level = 0
 
         # warming the first function of the DAG
         cs = generate_random_sample(cs_times[i])
@@ -147,7 +172,7 @@ def random_runner(dag_main: DAG, dist_funcs, warming_approach=None, iters=100, s
         ram = generate_random_sample(ram_usage[i])
 
         # Execution
-        allocate_function(i, ex, cs, ram, jobs)
+        allocate_function(i, ex, cs, ram, jobs, max_level)
 
         # Running other nodes
         while True:
@@ -155,6 +180,7 @@ def random_runner(dag_main: DAG, dist_funcs, warming_approach=None, iters=100, s
             edges = list(dag.dag_wfh.G.out_edges(i, data=True))
             if len(edges) == 0:
                 break
+            max_level += 1
             # getting the weight for each edge
             edge_weights = [edge[2]['weight'] for edge in edges]
 
@@ -171,13 +197,13 @@ def random_runner(dag_main: DAG, dist_funcs, warming_approach=None, iters=100, s
             ex = generate_random_sample(ex_times[child])
             ram = generate_random_sample(ram_usage[child])
 
-            allocate_function(child, ex, cs, ram, jobs)
+            allocate_function(child, ex, cs, ram, jobs, max_level)
 
             # Set the child to be the parent for the next iteration
             i = child
 
         # End the flow by putting a finish message in the queue
-        jobs.put(Job(topic='Finish', value=None))
+        jobs.put(Job(topic=JobTopics.FINISH, value=None))
 
         # wait for the time_handler to process all of the jobs
         time_handler_thread.join()
@@ -187,18 +213,21 @@ def random_runner(dag_main: DAG, dist_funcs, warming_approach=None, iters=100, s
     print('Mean of CS Durations', mean(total_cs_durations))
     print("Mean of CS Counts", mean(total_cs_counts))
     print("Mean of RAM Usages", mean(total_rams))
+    print("Mean of Cost", mean(total_cost))
 
     if store_file_path != None:
         store_in_file(store_file_path, (total_durations, total_rams,
-                      total_cs_durations, total_cs_counts))
+                      total_cs_durations, total_cs_counts, total_cost))
 
 
 def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, iters=100, store_file_path=None):
 
     total_durations = []
     total_rams = []
+    total_compute_cost = []
     total_cs_counts = []
     total_cs_durations = []
+    total_cost = []
 
     dag = copy.copy(dag_main)
 
@@ -206,7 +235,7 @@ def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, it
         path_c = copy.copy(path)
         jobs = Queue()
         time_handler_thread = Thread(target=time_handler, args=(
-            jobs, total_durations, total_rams, total_cs_counts, total_cs_durations))
+            jobs, total_durations, total_rams, total_cs_counts, total_cs_durations, total_compute_cost, total_cost))
         time_handler_thread.start()
 
         cs_times = dist_funcs['cold_start'].copy()
@@ -220,6 +249,7 @@ def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, it
             cs_candidates_thread.join()
 
         i = 0
+        max_level = 0
 
         # warming the first function of the DAG
         cs = generate_random_sample(cs_times[i])
@@ -230,7 +260,7 @@ def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, it
         # ram = mean(ram_usage[i])
 
         # Execution
-        allocate_function(i, ex, cs, ram, jobs)
+        allocate_function(i, ex, cs, ram, jobs, max_level)
 
         # Running other nodes
         while True:
@@ -238,6 +268,7 @@ def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, it
             edges = list(dag.dag_wfh.G.out_edges(i, data=True))
             if len(edges) == 0:
                 break
+            max_level += 1
 
             # Randomly choose an edge based on the weights
             chosen_index = path_c.pop(0)
@@ -254,13 +285,13 @@ def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, it
             # ex = mean(ex_times[child])
             # ram = mean(ram_usage[child])
 
-            allocate_function(child, ex, cs, ram, jobs)
+            allocate_function(child, ex, cs, ram, jobs, max_level)
 
             # Set the child to be the parent for the next iteration
             i = child
 
         # End the flow by putting a finish message in the queue
-        jobs.put(Job(topic='Finish', value=None))
+        jobs.put(Job(topic=JobTopics.FINISH, value=None))
 
         # wait for the time_handler to process all of the jobs
         time_handler_thread.join()
@@ -270,10 +301,11 @@ def path_runner(dag_main: DAG, dist_funcs, path: list, warming_approach=None, it
     print('Mean of CS Durations', mean(total_cs_durations))
     print("Mean of CS Counts", mean(total_cs_counts))
     print("Mean of RAM Usages", mean(total_rams))
+    print("Mean of Cost", mean(total_cost))
 
     if store_file_path != None:
         store_in_file(store_file_path, (total_durations, total_rams,
-                      total_cs_durations, total_cs_counts))
+                      total_cs_durations, total_cs_counts, total_cost))
 
 
 # This is a wrapper for that specifies paths in the flow runners

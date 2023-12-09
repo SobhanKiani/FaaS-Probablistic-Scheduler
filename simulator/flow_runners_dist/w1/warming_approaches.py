@@ -2,7 +2,7 @@ from dag.dag import DAG
 from termcolor import cprint
 from queue import Queue
 from statistics import mean
-from .utils import Job
+from .utils import Job, JobTopics, custom_print, show_print
 
 
 def mlp(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages):
@@ -14,16 +14,17 @@ def mlp(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages):
 
     cs_indexes = [u[0] for u in cs_candidates]
 
-    print("")
-    cprint(f'MLP-Cold Start Candidates: {cs_indexes} ', 'red')
-    print("")
+    custom_print("", show=show_print)
+    custom_print(
+        f'MLP-Cold Start Candidates: {cs_indexes} ', 'red', show=show_print)
+    custom_print("", show=show_print)
 
     # Without Planning
     # for node_idx, info, prob in cs_candidates:
     #     if node_idx != 0:
     #         ram = mean(ram_usages[node_idx])
     #         cs_times[node_idx] = [0]
-    #         jobs.put(Job(topic='RAM_START_BY_TIME', value={
+    #         jobs.put(Job(topic='RAM_START', value={
     #             'node': node_idx, 'amount': ram, 'time': 0}))
 
     cs_dict = {0: (0, (), {'weight': 1000})}
@@ -52,9 +53,10 @@ def mlp(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages):
                 levels[c] = []
 
         curr_node_i = 0
+        curr_level = 0
+
         while True:
             node_idx, info, prob = cs_dict[curr_node_i]
-
             ex = mean(ex_times[node_idx])
             cs = mean(cs_times[node_idx])
 
@@ -67,30 +69,34 @@ def mlp(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages):
             children = levels[node_idx]
 
             if children.__len__() > 0:
-                c_idx, c_info, c_prob = children[0]
-                cs_times[c_idx] = [0]
+                # node_idx, edge_info, transition_prob
+                c_idx, _, _ = children[0]
+                # cs_times[c_idx] = [0]
                 ram = mean(ram_usages[c_idx])
-                warming_sim_time += cs + ex
-                jobs.put(Job(topic='RAM_START_BY_TIME', value={
-                         'node': c_idx, 'amount': ram, 'time': warming_sim_time}))
+                # warming_sim_time +=  ex - 3.5
+                warming_sim_time += cs + ex - 3.5
+                jobs.put(Job(topic=JobTopics.RAM_START, value={
+                        #  'node': c_idx, 'amount': ram, 'alloc_time': warming_sim_time, 'level': curr_level+1}))
+                         'node': c_idx, 'amount': ram, 'alloc_time': 0, 'level': curr_level+1}))
 
                 curr_node_i = c_idx
+                curr_level += 1
             else:
                 break
 
 
 def optimal(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages, alpha=100, beta=0, l=-1):
     warming_queue = Queue()
-    warming_sim_time = 0
 
     cs_candidates = dag.get_cold_start_candidates(
         parent_idx=0, l=l, alpha=alpha, beta=beta)
 
     cs_indexes = [u[0] for u in cs_candidates]
 
-    print("")
-    cprint(f"OPTIMAL CS Candidates: {cs_indexes}", 'red')
-    print("")
+    custom_print("", show=show_print)
+    custom_print(
+        f"OPTIMAL CS Candidates: {cs_indexes}", 'red', show=show_print)
+    custom_print("", show=show_print)
 
     if len(cs_candidates) == 0:
         return []
@@ -125,11 +131,11 @@ def optimal(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages, alpha=100, be
             if c not in levels:
                 levels[c] = []
 
-    # (node, cs+ex of the parent)
-    warming_queue.put((cs_dict[0], 0))
+    # (node, cs+ex of the parent, level)
+    warming_queue.put((cs_dict[0], 0, 0))
 
     while not warming_queue.empty():
-        node, parent_time = warming_queue.get()
+        node, parent_time, level = warming_queue.get()
         node_idx, info, prob = node
         # print('Parent Node For Warming', node_idx)
 
@@ -145,14 +151,15 @@ def optimal(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages, alpha=100, be
         if children.__len__() > 0:
             for child in children:
                 c_idx, c_info, c_prob = child
-                cs_times[c_idx] = [0]
+                # cs_times[c_idx] = [0]
                 ram = mean(ram_usages[c_idx])
-                jobs.put(Job(topic='RAM_START_BY_TIME', value={
-                    'node': c_idx, 'amount': ram, 'time': parent_wst
+                jobs.put(Job(topic=JobTopics.RAM_START, value={
+                    # 'node': c_idx, 'amount': ram, 'alloc_time': parent_wst - 3.5, 'level': level + 1
+                    'node': c_idx, 'amount': ram, 'alloc_time': 0, 'level': level + 1
                 }))
 
                 # adding to queue to get checked next
-                warming_queue.put((child, parent_wst))
+                warming_queue.put((child, parent_wst, level+1))
 
 
 # These are the wrapper functions
