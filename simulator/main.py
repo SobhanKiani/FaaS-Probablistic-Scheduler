@@ -20,7 +20,7 @@ if __name__ == '__main__':
     f_cold_start = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_cold_start.set_flow_runner(random_runner, warming_approach=None)
     f_cold_start.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w1/random/4/cold-start.txt')
+        iters=iters, store_file_path='./new-results/w1/random/6/cold-start.txt')
     cprint(
         f"COLD START TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     f_mlp = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_mlp.set_flow_runner(random_runner, warming_approach=mlp)
     f_mlp.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w1/random/4/mlp.txt')
+        iters=iters, store_file_path='./new-results/w1/random/6/mlp.txt')
     cprint(f"MLP TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     f_all = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_all.set_flow_runner(random_runner, warming_approach=warming_all_approach)
     f_all.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w1/random/4/warming-all.txt')
+        iters=iters, store_file_path='./new-results/w1/random/6/warming-all.txt')
     cprint(
         f"WARMING ALL TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     f_optimal = FlowDistFunc(random_DAG, dag_images, w_dist_funcs)
     f_optimal.set_flow_runner(random_runner, warming_approach=optimal_approach)
     f_optimal.start_flow_runner(
-        iters=iters, store_file_path='./new-results/w1/random/4/optimal.txt')
+        iters=iters, store_file_path='./new-results/w1/random/6/optimal.txt')
     cprint(f"OPTIMAL TEST FINISHED FOR {iters} ITERS", 'white', 'on_magenta')
     print("----------------")
     # ---------------------------------------------------------------------

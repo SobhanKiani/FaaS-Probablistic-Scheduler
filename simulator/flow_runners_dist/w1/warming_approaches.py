@@ -168,7 +168,7 @@ def optimal(dag: DAG, jobs: Queue, ex_times, cs_times, ram_usages, alpha=100, be
 def optimal_approach(dag, jobs, ex_times, cs_times, ram_usages):
     optimal(dag, jobs, ex_times, cs_times,
             ram_usages, alpha=50, beta=20, l=-1)
-            # ram_usages, alpha=70, beta=15, l=-1)
+            # ram_usages, alpha=40, beta=0, l=-1)
 
 
 def warming_all_approach(dag, jobs, ex_times, cs_times, ram_usages):
